@@ -17,7 +17,7 @@ hetluchtalarm = _hetluchtalarm.Luchtalarm('hetluchtalarm')
 convertbot = _convertbot.ConvertBot('convertbot')
 grotebroer1 = _grotebroer1.GroteBroer1('grotebroer1')
 
-cron = CronRunner(
+cron = pycron.CronRunner(
     #   -------- -------- -------- -------- -------- -------- --------
     #   second   minute   hour     monthday month    year     weekday
     #   -------- -------- -------- -------- -------- -------- --------
