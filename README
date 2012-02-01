@@ -1,0 +1,30 @@
+
+
+casio_f91w        50% legacy; 50% new       broken: repeated tweets         half-functional
+convertbot        50% legacy; 50% new                                       half-functional
+deoldehove        100% new                  testing
+grotebroer1       100% new                  experimental 
+hetluchtalarm     100% new                  testing
+msvlieland        100% new                  OK
+
+rules = [
+    (' 00   *   *   *   *', casio_f91w.send_beep),
+
+    (' 00   *   *   *   *', deoldehove.sound_hour),
+    (' 30   *   *   *   *', deoldehove.sound_half),
+
+    (' 00   *   *   *   *', grotebroer1.check_dm),
+    (' 15   *   *   *   *', grotebroer1.check_dm),
+    (' 30   *   *   *   *', grotebroer1.check_dm),
+    (' 45   *   *   *   *', grotebroer1.check_dm),
+    
+    ('  0  12 1-7   *   1', hetluchtalarm.sound_alarm),
+
+    ('  0   9   *   *   *', msvlieland.sound_horn),
+    (' 15  14   *   *   *', msvlieland.sound_horn),
+    (' 19   0   *   *   *', msvlieland.sound_horn)
+]
+
+    (' 00   *   *   *   *', casio_f91w.send_beep),
+
+

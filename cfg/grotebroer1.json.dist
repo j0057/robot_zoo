@@ -1,0 +1,20 @@
+{
+    "oauth": {
+        "consumer_secret": "", 
+        "token": "", 
+        "consumer_key": "", 
+        "token_secret": ""
+    }, 
+    "login": {
+        "username": "grotebroer1", 
+        "password": ""
+    }, 
+    "terms": [
+    ], 
+    "admins": [
+        "j0057m", 
+        "berend_rk"
+    ], 
+    "suspects": {
+    }
+}

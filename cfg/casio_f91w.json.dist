@@ -1,0 +1,11 @@
+{
+    "oauth": {
+        "consumer_secret": "", 
+        "token": "", 
+        "consumer_key": "", 
+        "token_secret": ""
+    }, 
+    "alarms": {
+    }, 
+    "last_mention": ""
+}
