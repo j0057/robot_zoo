@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/python2.7 -B
 
 import sys
 import time
@@ -128,7 +128,7 @@ if __name__ == "__main__":
 
         #                                                                   @casio_f91w
           ('*        00       *        *        *        *        *       ', casio_f91w.send_beep)
-        , ('00-59/30 *        *        *        *        *        *       ', casio_f91w.handle_mentions)
+        , ('05-59/30 *        *        *        *        *        *       ', casio_f91w.handle_mentions)
 
         #                                                                   @deoldehove
         , ('*        00-59/30 *        10-12    09       2010     *       ', deoldehove.sound_clock_lwd_culinair)
@@ -154,6 +154,7 @@ if __name__ == "__main__":
         #                                                                   @grotebroer1
         , ('00-59/15 *        *        *        *        *        *       ', grotebroer1.check_dm)
         , ('00-59/20 *        *        *        *        *        *       ', grotebroer1.search_firehose)
+        , ('05       *        *        *        *        *        *       ', grotebroer1.follow_suspects)
 
         #   -------- -------- -------- -------- -------- -------- --------
     )

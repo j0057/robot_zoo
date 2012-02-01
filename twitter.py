@@ -21,6 +21,7 @@ class LoggingObject(object):
     LEVEL_ERROR = 0
 
     LEVEL = LEVEL_INFO
+    #EVEL = LEVEL_DEBUG
 
     def __log(self, level, message, *args):
         if level > self.LEVEL:

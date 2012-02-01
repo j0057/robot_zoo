@@ -5,6 +5,8 @@ __author__ = 'Joost Molenaar <j.j.molenaar@gmail.com>'
 
 import time
 import urllib2, base64, json, threading, re
+import random
+
 import twitter
 
 class GroteBroer1(twitter.TwitterAPI, twitter.StreamAPI):
@@ -45,6 +47,8 @@ class GroteBroer1(twitter.TwitterAPI, twitter.StreamAPI):
     def search_firehose(self, t):
         c,r=0,0
         for tweet in self.get_firehose():
+            if tweet['entities']['urls']:
+                continue # don't want to help spammers by RT'ing links to bad places
             c += 1
             text = tweet['text']
             words = [ w.lower() for w in self.WORDS_REGEX.split(text) ]
@@ -111,4 +115,25 @@ class GroteBroer1(twitter.TwitterAPI, twitter.StreamAPI):
         except twitter.FailWhale as fail:
             self.log('FAIL WHALE: {0}', fail.args)
             return False
+
+    def follow_suspects(self, t):
+        for screen_name, id in list(self.config['suspects'].items()):
+            if random.randint(0, 10) <= 2:
+                try:
+                    self.info('Retweeting #{0} from @{1}', id, screen_name)
+                    self.post_statuses_retweet(id)
+                except twitter.FailWhale as fail:
+                    fail.log_error(self)
+
+                try:
+                    self.info('Following user @{0}', screen_name)
+                    self.post_friendships_create(screen_name=screen_name)
+                except twitter.FailWhale as fail:
+                    fail.log_error(self)
+
+            del self.config['suspects'][screen_name]
+            self.save()
+        return True
+
+                
 
