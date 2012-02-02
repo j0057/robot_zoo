@@ -118,7 +118,7 @@ class GroteBroer1(twitter.TwitterAPI, twitter.StreamAPI):
 
     def follow_suspects(self, t):
         for screen_name, id in list(self.config['suspects'].items()):
-            if random.randint(0, 10) <= 2:
+            if random.randint(0, 10) < 1:
                 try:
                     self.info('Retweeting #{0} from @{1}', id, screen_name)
                     self.post_statuses_retweet(id)
