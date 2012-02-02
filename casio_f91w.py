@@ -168,8 +168,10 @@ class CasioF91W(twitter.TwitterAPI):
     DAYS = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
     MSG = u'BEEP BEEP! {0} {1} {2:02}:{3:02}:00'
 
-    R1 = re.compile(r'alarm ([01]?[0-9]|2[0-3]):([0-5][0-9]) (\+|-)([01][0-9]|2[0-3])([0-5][0-9])')
+    R1 = re.compile(r'alarm ([01]?[0-9]|2[0-3]):([0-5][0-9]) ([+-])([01][0-9]|2[0-3])([0-5][0-9])')
     R2 = re.compile(r'alarm ([01]?[0-9]|2[0-3]):([0-5][0-9])')
+    R3 = re.compile(r'alarm (0?[1-9]|1[0-2]):([0-5][0-9]) (AM|PM) ([+-])([01][0-9]|2[0-3])([0-5][0-9])')
+    R4 = re.compile(r'alarm (0?[1-9]|1[0-2]):([0-5][0-9]) (AM|PM)')
 
     def send_beep(self, date):
         try:
@@ -188,23 +190,49 @@ class CasioF91W(twitter.TwitterAPI):
             self.config['alarms'][key] = {}
         self.config['alarms'][key][m_id] = m_sn
 
-    def parse_mention_for_alarm(self, mention):
-        id, screen_name, text = mention['id'], mention['user']['screen_name'], mention['text']
+    def parse_tweet_for_alarm(self, tweet):
+        id, screen_name, text = tweet['id'], tweet['user']['screen_name'], tweet['text']
 
-        match = self.R1.search(text)
+        match = self.R1.search(text) # hh:mm <+|->hhmm
         if match:
             self.log('Alarm: #{0} from @{1}: {2} --> {3}', id, screen_name, repr(text), match.groups())
             th, tm, s, zh, zm = match.groups()
             th, tm = int(th), int(tm)
-            return ((th, tm), mention)
+            zh, zm = int(zh), int(zm)
+            s = +1 if s == '+' else -1
+            d = datetime.datetime.combine(
+                datetime.date.today(),
+                datetime.time(hour=th, minute=tm) + sign * datetime.timedelta(hours=zh, minutes=zm))
+            return ((d.hour, d.minute), tweet)
         
-        match = self.R2.search(text)
+        match = self.R2.search(text) # hh:mm
         if match:
             self.log('Alarm: #{0} from @{1}: {2} --> {3}', id, screen_name, repr(text), match.groups())
-            th, tm = map(int, match.groups())
-            return ((th, tm), mention)
+            th, tm = int(th), int(tm)
+            return ((th, tm), tweet)
 
-        return (None, mention)
+        match = self.R3.search(text) # hh:mm <AM|PM> <+|->hhmm
+        if match:
+            th, tm, am_pm, s, zh, zm = match.groups()
+            th, tm = int(th), int(tm)
+            zh, zm = int(zh), int(zm)
+            s = +1 if s == '+' else -1
+            if am_pm == 'AM' and th == 12: th -= 12
+            if am_pm == 'PM' and th  < 12: th += 12
+            d = datetime.datetime.combine(
+                datetime.date.today(),
+                datetime.time(hour=th, minute=tm) + sign * datetime.timedelta(hours=zh, minutes=zm))
+            return ((d.hour, d.minute), tweet)
+
+        match = self.R4.search(text) # hh:mm <AM|PM>
+        if match:
+            th, tm, am_pm = match.groups()
+            th, tm = int(th), int(tm)
+            if am_pm == 'AM' and th == 12: th -= 12
+            if am_pm == 'PM' and th  < 12: th += 12
+            return ((th, tm), tweet)
+
+        return (None, tweet)
             
     def get_mentions(self):
         last_mention = self.config['last_mention']
@@ -219,7 +247,7 @@ class CasioF91W(twitter.TwitterAPI):
     def handle_mentions(self, t):
         try:
             for m in self.get_mentions():
-                alarm, mention = self.parse_mention_for_alarm(m)
+                alarm, mention = self.parse_tweet_for_alarm(m)
                 if alarm:
                     self.save_alarm(alarm, mention)
             return True
