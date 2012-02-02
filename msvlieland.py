@@ -22,3 +22,6 @@ class MsVlieland(twitter.TwitterAPI):
             self.log('FAIL WHALE: {0}', fail.args)
             return False
 
+    def geen_afvaart(self, t=None):
+        self.info("UITZONDERING: geen afvaart, geen tweets.")
+        return True
