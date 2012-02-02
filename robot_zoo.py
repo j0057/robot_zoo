@@ -39,10 +39,6 @@ cron = pycron.CronRunner(
     , ('*        00-59/30 *        *        *        *        *       ', deoldehove.sound_clock)
 
     #                                                                   @msvlieland
-    , ('*        00       09       03       02       2012     *       ', msvlieland.geen_afvaart)
-    , ('*        15       14       03       02       2012     *       ', msvlieland.geen_afvaart)
-    , ('*        00       19       03       02       2012     *       ', msvlieland.geen_afvaart)
-
     , ('*        00       09       *        *        *        *       ', msvlieland.sound_horn)
     , ('*        15       14       *        *        *        *       ', msvlieland.sound_horn)
     , ('*        00       19       *        *        *        *       ', msvlieland.sound_horn)
