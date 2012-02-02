@@ -30,13 +30,19 @@ cron = pycron.CronRunner(
     , ('*        00-59/30 *        10-12    09       2010     *       ', deoldehove.sound_clock_lwd_culinair)
     , ('*        00-59/30 *        09-11    09       2011     *       ', deoldehove.sound_clock_lwd_culinair)
     , ('*        00-59/30 *        07-09    09       2012     *       ', deoldehove.sound_clock_lwd_culinair)
+
     , ('*        00-59/30 09-23    13       08       2011     *       ', deoldehove.sound_clock_into_the_grave)
     , ('*        00-59/30 00-08    14       08       2011     *       ', deoldehove.sound_clock_into_the_grave)
     , ('*        00-59/30 09-23    11       08       2012     *       ', deoldehove.sound_clock_into_the_grave)
     , ('*        00-59/30 00-08    12       08       2012     *       ', deoldehove.sound_clock_into_the_grave)
+
     , ('*        00-59/30 *        *        *        *        *       ', deoldehove.sound_clock)
 
     #                                                                   @msvlieland
+    , ('*        00       09       03       02       2012     *       ', msvlieland.geen_afvaart)
+    , ('*        15       14       03       02       2012     *       ', msvlieland.geen_afvaart)
+    , ('*        00       19       03       02       2012     *       ', msvlieland.geen_afvaart)
+
     , ('*        00       09       *        *        *        *       ', msvlieland.sound_horn)
     , ('*        15       14       *        *        *        *       ', msvlieland.sound_horn)
     , ('*        00       19       *        *        *        *       ', msvlieland.sound_horn)
