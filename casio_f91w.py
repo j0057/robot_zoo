@@ -196,13 +196,13 @@ class CasioF91W(twitter.TwitterAPI):
         match = self.R1.search(text) # hh:mm <+|->hhmm
         if match:
             self.log('Alarm: #{0} from @{1}: {2} --> {3}', id, screen_name, repr(text), match.groups())
-            th, tm, s, zh, zm = match.groups()
+            th, tm, sign, zh, zm = match.groups()
             th, tm = int(th), int(tm)
             zh, zm = int(zh), int(zm)
-            s = +1 if s == '+' else -1
+            sign = +1 if sign == '+' else -1
             d = datetime.datetime.combine(
                 datetime.date.today(),
-                datetime.time(hour=th, minute=tm) + sign * datetime.timedelta(hours=zh, minutes=zm))
+                datetime.time(hour=th, minute=tm)) + sign * datetime.timedelta(hours=zh, minutes=zm)
             return ((d.hour, d.minute), tweet)
         
         match = self.R2.search(text) # hh:mm
@@ -213,15 +213,15 @@ class CasioF91W(twitter.TwitterAPI):
 
         match = self.R3.search(text) # hh:mm <AM|PM> <+|->hhmm
         if match:
-            th, tm, am_pm, s, zh, zm = match.groups()
+            th, tm, am_pm, sign, zh, zm = match.groups()
             th, tm = int(th), int(tm)
             zh, zm = int(zh), int(zm)
-            s = +1 if s == '+' else -1
+            sign = +1 if sign == '+' else -1
             if am_pm == 'AM' and th == 12: th -= 12
             if am_pm == 'PM' and th  < 12: th += 12
             d = datetime.datetime.combine(
                 datetime.date.today(),
-                datetime.time(hour=th, minute=tm) + sign * datetime.timedelta(hours=zh, minutes=zm))
+                datetime.time(hour=th, minute=tm)) + sign * datetime.timedelta(hours=zh, minutes=zm)
             return ((d.hour, d.minute), tweet)
 
         match = self.R4.search(text) # hh:mm <AM|PM>
