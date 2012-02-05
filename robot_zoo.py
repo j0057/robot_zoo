@@ -10,6 +10,18 @@ import hetluchtalarm as _hetluchtalarm
 import convertbot as _convertbot
 import grotebroer1 as _grotebroer1
 
+def parse_args():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-q', '--quiet', action='store_true', default=False, help='only output errors')
+    parser.add_argument('-d', '--debug', action='store_true', default=False, help='output everything')
+    return parser.parse_args()
+   
+args = parse_args()
+
+if args.quiet: twitter.LoggingObject.LEVEL = twitter.LoggingObject.LEVEL_ERROR 
+if args.debug: twitter.LoggingObject.LEVEL = twitter.LoggingObject.LEVEL_DEBUG
+
 casio_f91w = _casio_f91w.CasioF91W('casio_f91w')
 deoldehove = _deoldehove.DeOldehove('deoldehove')
 msvlieland = _msvlieland.MsVlieland('msvlieland')

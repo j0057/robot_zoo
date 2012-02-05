@@ -1,5 +1,6 @@
 #!/usr/bin/python2.7 -B
 
+import re
 import sys
 import time
 import threading, Queue
@@ -44,6 +45,8 @@ class CronRunner(twitter.LoggingObject):
         self.queue = Queue.Queue()
 
     def parse_rule(self, rule, action):
+        #r = re.compile(r'(\d\d)?(-(\d\d))?(/(\d\d))?')
+       
         FIRSTS   = '00-00/01 00-00/01 00-00/01 01-01/01 01-01/01 00-99/01 00-06/01'.split()
         DEFAULTS = '00-59/01 00-59/01 00-23/01 01-31/01 01-12/01 00-99/01 00-06/01'.split()
 
@@ -51,12 +54,14 @@ class CronRunner(twitter.LoggingObject):
         name = action.im_self.name if hasattr(action, 'im_self') else ''
         self.log('{0} {1:16} {2:32}', ' '.join('{0:8}'.format(r) for r in rule), name, action.__name__)
 
+        # replace * with 00-00/01 on the left side of the first non-*
         for (i, v) in enumerate(rule):          
             if v == '*':
                 rule[i] = FIRSTS[i]
             else:
                 break
 
+        # replace * with 00-max/01 on the right side of the first non-*
         for (j, v) in enumerate(rule):          
             if j <= i:
                 continue
@@ -66,8 +71,7 @@ class CronRunner(twitter.LoggingObject):
         rule = (p if '-' in p else p + '-' + p for p in rule)   # double values without -
         rule = (p if '/' in p else p + '/01' for p in rule)     # add interval to values without /
 
-        rule = (p.replace('-','/') for p in rule)               # change - to /
-        rule = (r.split('/') for r in rule)                     # split into three parts
+        rule = (re.split('[-/]', r) for r in rule)              # split into three parts
         rule = ((int(f), int(t)+1, int(s)) for (f,t,s) in rule) # convert three values to ints
         rule = list(rule)
 
@@ -105,4 +109,13 @@ class CronRunner(twitter.LoggingObject):
                     self.queue.put((action, [t], {}))
         finally:
             self.queue.put(None)
+
+if __name__ == '__main__':
+    import re
+    T = '00-59/01 00-59 00 00/15 00-00/01 /15'.split()
+    r = re.compile(r'(\d\d)?(-(\d\d))?(/(\d\d))?')
+    for t in T:
+        print '{0:10}'.format(t),
+        f, _, t, _, s = r.match(t).groups()
+        print 'f:', f, 't:', t, 's:', s
 

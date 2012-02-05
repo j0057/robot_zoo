@@ -67,22 +67,31 @@ class OauthClient(LoggingObject):
         return client
 
     def oauth_request(self, method, url, **get_params):
+        global client
         client = self.create_oauth_client()
 
         body = None
-        headers = { 'Accept-Encoding: application/json' }
+        headers = { 'Accept': 'application/json' }
         if (method == 'GET') and get_params:
             url += '?'
             url += urllib.urlencode(get_params)
         elif (method == 'POST') and get_params:
             body = urllib.urlencode(get_params)
+            headers['Content-Type'] = 'application/x-www-form-urlencoded'
 
-        self.debug('    url: {0}', url)
+        self.debug('    < {0} {1}', method, url)
+
+        for k in sorted(headers.keys()):
+            self.debug('    < {0}: {1}', k.title(), headers[k])
 
         if body:
-            self.debug('    body: {0}', repr(body))
+            self.debug('')
+            self.debug(unicode(body))
 
         response, content = client.request(url, method=method, body=body, headers=headers, force_auth_header=True)
+
+        for k in sorted(response.keys()):
+            self.debug('    > {0}: {1}', k.title(), response[k])
 
         #if 'x-ratelimit-remaining' in response:
         #    self.log('    remaining API calls: {0}', response['x-ratelimit-remaining'])
@@ -130,7 +139,10 @@ class StreamAPI(object):
         req = urllib2.Request(url)
         req.add_header('Authorization', 'Basic: ' + base64.encodestring(username + ':' + password)[:-1])
         for line in urllib2.urlopen(req):
-            yield json.loads(line)
+            try:
+                yield json.loads(line)
+            except ValueError:
+                self.error(repr(line))
 
 
 class TwitterAPI(Configuration, OauthClient):
