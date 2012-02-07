@@ -39,36 +39,36 @@ cron = pycron.CronRunner(
     , ('05-59/30 *        *        *        *        *        *       ', casio_f91w.handle_mentions)
 
     #                                                                   @deoldehove
-    , ('*        00-59/30 *        10-12    09       2010     *       ', deoldehove.sound_clock_lwd_culinair)
-    , ('*        00-59/30 *        09-11    09       2011     *       ', deoldehove.sound_clock_lwd_culinair)
-    , ('*        00-59/30 *        07-09    09       2012     *       ', deoldehove.sound_clock_lwd_culinair)
+    , ('*        00-59/30 *        10-12    sep      2010     *       ', deoldehove.sound_clock_lwd_culinair)
+    , ('*        00-59/30 *        09-11    sep      2011     *       ', deoldehove.sound_clock_lwd_culinair)
+    , ('*        00-59/30 *        07-09    sep      2012     *       ', deoldehove.sound_clock_lwd_culinair)
 
-    , ('*        00-59/30 09-23    13       08       2011     *       ', deoldehove.sound_clock_into_the_grave)
-    , ('*        00-59/30 00-08    14       08       2011     *       ', deoldehove.sound_clock_into_the_grave)
+    , ('*        00-59/30 09-23    13       aug      2011     *       ', deoldehove.sound_clock_into_the_grave)
+    , ('*        00-59/30 00-08    14       aug      2011     *       ', deoldehove.sound_clock_into_the_grave)
 
-    , ('*        00-59/30 09-23    11       08       2012     *       ', deoldehove.sound_clock_into_the_grave)
-    , ('*        00-59/30 00-08    12       08       2012     *       ', deoldehove.sound_clock_into_the_grave)
+    , ('*        00-59/30 09-23    11       aug      2012     *       ', deoldehove.sound_clock_into_the_grave)
+    , ('*        00-59/30 00-08    12       aug      2012     *       ', deoldehove.sound_clock_into_the_grave)
 
     , ('*        00-59/30 *        *        *        *        *       ', deoldehove.sound_clock)
 
     #                                                                   @msvlieland
-    , ('*        15       10       04-09    02       2012     *       ', msvlieland.sound_horn)
-    , ('*        30       15       04-09    02       2012     *       ', msvlieland.sound_horn)
+    , ('*        15       10       04-09    feb      2012     *       ', msvlieland.sound_horn)
+    , ('*        30       15       04-09    feb      2012     *       ', msvlieland.sound_horn)
 
-    , ('*        00       09       04-09    02       2012     *       ', msvlieland.geen_afvaart)
+    , ('*        00       09       04-09    feb      2012     *       ', msvlieland.geen_afvaart)
     , ('*        00       09       *        *        *        *       ', msvlieland.sound_horn)
 
-    , ('*        15       14       04-09    02       2012     *       ', msvlieland.geen_afvaart)
+    , ('*        15       14       04-09    feb      2012     *       ', msvlieland.geen_afvaart)
     , ('*        15       14       *        *        *        *       ', msvlieland.sound_horn)
 
-    , ('*        00       19       04-09    02       2012     *       ', msvlieland.geen_afvaart)
+    , ('*        00       19       04-09    feb      2012     *       ', msvlieland.geen_afvaart)
     , ('*        00       19       *        *        *        *       ', msvlieland.sound_horn)
 
     #                                                                   @convertbot
     , ('00       *        *        *        *        *        *       ', convertbot.post_time)
 
     #                                                                   @hetluchtalarm
-    , ('*        00       12       01-07    *        *        00      ', hetluchtalarm.sound_alarm)
+    , ('*        00       12       01-07    *        *        mon     ', hetluchtalarm.sound_alarm)
 
     #                                                                   @grotebroer1
     , ('00-59/15 *        *        *        *        *        *       ', grotebroer1.check_dm)

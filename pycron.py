@@ -49,8 +49,10 @@ class CronRunner(twitter.LoggingObject):
        
         FIRSTS   = '00-00/01 00-00/01 00-00/01 01-01/01 01-01/01 00-99/01 00-06/01'.split()
         DEFAULTS = '00-59/01 00-59/01 00-23/01 01-31/01 01-12/01 00-99/01 00-06/01'.split()
+        MONTHS   = 'jan feb mar apr may jun jul aug sep oct nov dec'.split()
+        DAYS     = 'mon tue wed thu fri sat sun'.split()
 
-        rule = rule.split()
+        rule = rule.lower().split()
         name = action.im_self.name if hasattr(action, 'im_self') else ''
         self.log('{0} {1:16} {2:32}', ' '.join('{0:8}'.format(r) for r in rule), name, action.__name__)
 
@@ -67,6 +69,14 @@ class CronRunner(twitter.LoggingObject):
                 continue
             if v == '*':
                 rule[j] = DEFAULTS[j]
+
+        # expand month names
+        for (m_num, m_name) in enumerate(MONTHS):
+            rule[4] = rule[4].replace(m_name, '{0:02}'.format(m_num + 1))
+
+        # expand day names
+        for (d_num, d_name) in enumerate(DAYS):
+            rule[6] = rule[6].replace(d_name, '{0:02}'.format(d_num))
 
         rule = (p if '-' in p else p + '-' + p for p in rule)   # double values without -
         rule = (p if '/' in p else p + '/01' for p in rule)     # add interval to values without /
