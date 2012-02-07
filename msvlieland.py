@@ -23,5 +23,4 @@ class MsVlieland(twitter.TwitterAPI):
             return False
 
     def geen_afvaart(self, t=None):
-        self.info("UITZONDERING: geen afvaart, geen tweets.")
-        return True
+        return True # succesvol niets doen
