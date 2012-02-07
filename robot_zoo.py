@@ -45,22 +45,23 @@ cron = pycron.CronRunner(
 
     , ('*        00-59/30 09-23    13       08       2011     *       ', deoldehove.sound_clock_into_the_grave)
     , ('*        00-59/30 00-08    14       08       2011     *       ', deoldehove.sound_clock_into_the_grave)
+
     , ('*        00-59/30 09-23    11       08       2012     *       ', deoldehove.sound_clock_into_the_grave)
     , ('*        00-59/30 00-08    12       08       2012     *       ', deoldehove.sound_clock_into_the_grave)
 
     , ('*        00-59/30 *        *        *        *        *       ', deoldehove.sound_clock)
 
     #                                                                   @msvlieland
-    , ('*        15       10       04-06    02       2012     *       ', msvlieland.sound_horn)
-    , ('*        30       15       04-06    02       2012     *       ', msvlieland.sound_horn)
+    , ('*        15       10       04-09    02       2012     *       ', msvlieland.sound_horn)
+    , ('*        30       15       04-09    02       2012     *       ', msvlieland.sound_horn)
 
-    , ('*        00       09       04-06    02       2012     *       ', msvlieland.geen_afvaart)
+    , ('*        00       09       04-09    02       2012     *       ', msvlieland.geen_afvaart)
     , ('*        00       09       *        *        *        *       ', msvlieland.sound_horn)
 
-    , ('*        15       14       04-06    02       2012     *       ', msvlieland.geen_afvaart)
+    , ('*        15       14       04-09    02       2012     *       ', msvlieland.geen_afvaart)
     , ('*        15       14       *        *        *        *       ', msvlieland.sound_horn)
 
-    , ('*        00       19       04-06    02       2012     *       ', msvlieland.geen_afvaart)
+    , ('*        00       19       04-09    02       2012     *       ', msvlieland.geen_afvaart)
     , ('*        00       19       *        *        *        *       ', msvlieland.sound_horn)
 
     #                                                                   @convertbot
