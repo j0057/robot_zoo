@@ -52,16 +52,16 @@ cron = pycron.CronRunner(
     , ('*        00-59/30 *        *        *        *        *       ', deoldehove.sound_clock)
 
     #                                                                   @msvlieland
-    , ('*        15       10       04-15    feb      2012     *       ', msvlieland.sound_horn)
-    , ('*        30       15       04-15    feb      2012     *       ', msvlieland.sound_horn)
+    , ('*        15       10       04-16    feb      2012     *       ', msvlieland.sound_horn)
+    , ('*        30       15       04-16    feb      2012     *       ', msvlieland.sound_horn)
 
-    , ('*        00       09       04-15    feb      2012     *       ', msvlieland.geen_afvaart)
+    , ('*        00       09       04-16    feb      2012     *       ', msvlieland.geen_afvaart)
     , ('*        00       09       *        *        *        *       ', msvlieland.sound_horn)
 
-    , ('*        15       14       04-15    feb      2012     *       ', msvlieland.geen_afvaart)
+    , ('*        15       14       04-16    feb      2012     *       ', msvlieland.geen_afvaart)
     , ('*        15       14       *        *        *        *       ', msvlieland.sound_horn)
 
-    , ('*        00       19       04-15    feb      2012     *       ', msvlieland.geen_afvaart)
+    , ('*        00       19       04-16    feb      2012     *       ', msvlieland.geen_afvaart)
     , ('*        00       19       *        *        *        *       ', msvlieland.sound_horn)
 
     #                                                                   @convertbot
