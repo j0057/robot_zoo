@@ -34,11 +34,11 @@ cron = pycron.CronRunner(
     #   second   minute   hour     monthday month    year     weekday
     #   -------- -------- -------- -------- -------- -------- --------
 
-    #                                                                   @casio_f91w
+    # .......... ........ ........ ........ ........ ........ ......... @casio_f91w
       ('*        00       *        *        *        *        *       ', casio_f91w.send_beep)
-    , ('05-59/30 *        *        *        *        *        *       ', casio_f91w.handle_mentions)
+    # ('05-59/30 *        *        *        *        *        *       ', casio_f91w.handle_mentions)
 
-    #                                                                   @deoldehove
+    #   ........ ........ ........ ........ ........ ........ ........  @deoldehove
     , ('*        00-59/30 *        10-12    sep      2010     *       ', deoldehove.sound_clock_lwd_culinair)
     , ('*        00-59/30 *        09-11    sep      2011     *       ', deoldehove.sound_clock_lwd_culinair)
     , ('*        00-59/30 *        07-09    sep      2012     *       ', deoldehove.sound_clock_lwd_culinair)
@@ -51,29 +51,47 @@ cron = pycron.CronRunner(
 
     , ('*        00-59/30 *        *        *        *        *       ', deoldehove.sound_clock)
 
-    #                                                                   @msvlieland
-    , ('*        15       10       04-16    feb      2012     *       ', msvlieland.sound_horn)
+    #   ........ ........ ........ ........ ........ ........ ........  @msvlieland
+    , ('*        15       10       04-16    feb      2012     *       ', msvlieland.sound_horn) # ijs op waddenzee 2012 
     , ('*        30       15       04-16    feb      2012     *       ', msvlieland.sound_horn)
 
-    , ('*        00       09       04-16    feb      2012     *       ', msvlieland.geen_afvaart)
-    , ('*        00       09       *        *        *        *       ', msvlieland.sound_horn)
+    , ('*        00       09       17       feb      2012     *       ', msvlieland.sound_horn)
+    , ('*        00       17       17       feb      2012     *       ', msvlieland.sound_horn)
 
-    , ('*        15       14       04-16    feb      2012     *       ', msvlieland.geen_afvaart)
-    , ('*        15       14       *        *        *        *       ', msvlieland.sound_horn)
+    , ('*        00       09       04-17    feb      2012     *       ', msvlieland.geen_afvaart)
+    , ('*        15       14       04-17    feb      2012     *       ', msvlieland.geen_afvaart)
+    , ('*        00       19       04-17    feb      2012     *       ', msvlieland.geen_afvaart)
 
-    , ('*        00       19       04-16    feb      2012     *       ', msvlieland.geen_afvaart)
-    , ('*        00       19       *        *        *        *       ', msvlieland.sound_horn)
+    , ('*        00       09       *        apr-sep  2012     *       ', msvlieland.sound_horn) # zomerdienstregeling 2012
+    , ('*        15       14       *        apr-sep  2012     *       ', msvlieland.sound_horn)
+    , ('*        00       19       *        apr-sep  2012     *       ', msvlieland.sound_horn)
 
-    #                                                                   @convertbot
+    , ('*        00       09       25       dec      2012     *       ', msvlieland.geen_afvaart) # winterdienstregeling 2012-2013
+    , ('*        00       09       *        oct-dec  2012     sun     ', msvlieland.geen_afvaart)
+    , ('*        00       09       *        oct-dec  2012     *       ', msvlieland.sound_horn)
+    , ('*        00       09       *        jan-apr  2013     sun     ', msvlieland.geen_afvaart)
+    , ('*        00       09       *        jan-apr  2013     *       ', msvlieland.sound_horn)
+
+    , ('*        15       14       *        oct-dec  2012     *       ', msvlieland.sound_horn)
+    , ('*        15       14       *        jan-apr  2013     *       ', msvlieland.sound_horn)
+
+    , ('*        00       19       *        oct-dec  2012     tue     ', msvlieland.sound_horn)
+    , ('*        00       19       *        oct-dec  2012     fri     ', msvlieland.sound_horn)
+    , ('*        00       19       *        oct-dec  2012     sun     ', msvlieland.sound_horn)
+    , ('*        00       19       *        jan-apr  2013     tue     ', msvlieland.sound_horn)
+    , ('*        00       19       *        jan-apr  2013     fri     ', msvlieland.sound_horn)
+    , ('*        00       19       *        jan-apr  2013     sun     ', msvlieland.sound_horn)
+
+    #   ........ ........ ........ ........ ........ ........ ........  @convertbot
     , ('00       *        *        *        *        *        *       ', convertbot.post_time)
 
-    #                                                                   @hetluchtalarm
+    #   ........ ........ ........ ........ ........ ........ ........  @hetluchtalarm
     , ('*        00       12       01-07    *        *        mon     ', hetluchtalarm.sound_alarm)
 
-    #                                                                   @grotebroer1
-    , ('00-59/15 *        *        *        *        *        *       ', grotebroer1.check_dm)
-    , ('00-59/20 *        *        *        *        *        *       ', grotebroer1.search_firehose)
-    , ('05       *        *        *        *        *        *       ', grotebroer1.follow_suspects)
+    #   ........ ........ ........ ........ ........ ........ ........  @grotebroer1
+    # ('00-59/15 *        *        *        *        *        *       ', grotebroer1.check_dm)
+    # ('00-59/20 *        *        *        *        *        *       ', grotebroer1.search_firehose)
+    # ('05       *        *        *        *        *        *       ', grotebroer1.follow_suspects)
 
     #   -------- -------- -------- -------- -------- -------- --------
 )
@@ -86,12 +104,12 @@ convertbot.check()
 grotebroer1.check()
 
 try:
-    grotebroer1.start_firehose()
+    #grotebroer1.start_firehose()
     cron.start_executor()
     cron.run_local()
 except KeyboardInterrupt:
     cron.log('Exiting')
 finally:
     cron.stop_executor()
-    grotebroer1.stop_firehose()
+    #grotebroer1.stop_firehose()
 
