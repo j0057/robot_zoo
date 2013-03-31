@@ -18,6 +18,16 @@ class Luchtalarm(twitter.TwitterAPI):
               + u' '
               + u'Hooooooooooooeeeeeeeeeeeeeeuuuuuuuuuuiiiiiiiiiii!'
               + self.stuffing(month, year))
+
+    def tweede_paasdag_2013(self, t):
+        status = "Vandaag als het goed is geen luchtalarm, vrolijk Pasen!"
+        try:
+            self.info('Posting status: {0} ({1})', repr(status), len(status))
+            self.post_statuses_update(status=status)
+            return True
+        except twitter.FailWhale as fail:
+            self.error('FAIL WHALE: {0}', fail.args)
+            return False
     
     def sound_alarm(self, t):
         status = self.luchtalarm(t.tm_mon, t.tm_year)

@@ -86,6 +86,7 @@ cron = pycron.CronRunner(
     , ('00       *        *        *        *        *        *       ', convertbot.post_time)
 
     #   ........ ........ ........ ........ ........ ........ ........  @hetluchtalarm
+    , ('*        00       12       01       04       2013     *       ', hetluchtalarm.tweede_paasdag_2013)
     , ('*        00       12       01-07    *        *        mon     ', hetluchtalarm.sound_alarm)
 
     #   ........ ........ ........ ........ ........ ........ ........  @grotebroer1
