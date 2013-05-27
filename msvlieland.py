@@ -22,5 +22,6 @@ class MsVlieland(twitter.TwitterAPI):
             self.log('FAIL WHALE: {0}', fail.args)
             return False
 
-    def geen_afvaart(self, t=None):
+    def _(self, t=None):
         return True # succesvol niets doen
+
