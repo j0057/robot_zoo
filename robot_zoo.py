@@ -82,6 +82,10 @@ cron = pycron.CronRunner(
     , ('*        00       19       *        jan-apr  2013     fri     ', msvlieland.sound_horn)
     , ('*        00       19       *        jan-apr  2013     sun     ', msvlieland.sound_horn)
 
+    , ('*        00       09       *        may-sep  2013     *       ', msvlieland.sound_horn) # zomerdienstregeling 2013
+    , ('*        15       14       *        may-sep  2013     *       ', msvlieland.sound_horn)
+    , ('*        00       19       *        may-sep  2013     *       ', msvlieland.sound_horn)
+
     #   ........ ........ ........ ........ ........ ........ ........  @convertbot
     , ('00       *        *        *        *        *        *       ', convertbot.post_time)
 

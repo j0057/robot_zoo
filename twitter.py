@@ -21,7 +21,7 @@ class LoggingObject(object):
     LEVEL_ERROR = 0
 
     LEVEL = LEVEL_INFO
-    #EVEL = LEVEL_DEBUG
+    LEVEL = LEVEL_DEBUG
 
     def __log(self, level, message, *args):
         if level > self.LEVEL:
@@ -70,7 +70,7 @@ class OauthClient(LoggingObject):
         global client
         client = self.create_oauth_client()
 
-        body = None
+        body = ''
         headers = { 'Accept': 'application/json' }
         if (method == 'GET') and get_params:
             url += '?'
@@ -88,7 +88,7 @@ class OauthClient(LoggingObject):
             self.debug('')
             self.debug(unicode(body))
 
-        response, content = client.request(url, method=method, body=body, headers=headers, force_auth_header=True)
+        response, content = client.request(url, method=method, body=body, headers=headers)#, force_auth_header=True)
 
         for k in sorted(response.keys()):
             self.debug('    > {0}: {1}', k.title(), response[k])
@@ -96,11 +96,8 @@ class OauthClient(LoggingObject):
         #if 'x-ratelimit-remaining' in response:
         #    self.log('    remaining API calls: {0}', response['x-ratelimit-remaining'])
 
-        if response['content-type'] == 'application/json; charset=utf-8':
+        if re.match('application/json(; ?charset=utf-8)?', response['content-type'], re.IGNORECASE):
             content = json.JSONDecoder().decode(content.decode('utf8'))
-
-        if response['content-type'] == 'application/json':
-            content = json.JSONDecoder().decode(content)
 
         if 200 <= int(response['status']) < 300:
             status = response['status']
@@ -215,7 +212,7 @@ def get_new_mentions_(since_id=''):
 if __name__ == '__main__':
     LoggingObject.LEVEL = LoggingObject.LEVEL_DEBUG
 
-    twtr = TwitterAPI('cfg/johndoeveloper.json')
+    twtr = TwitterAPI('johndoeveloper')
     twtr.get_account_verify_credentials()
 
     def j(o):
