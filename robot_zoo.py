@@ -166,6 +166,7 @@ hetluchtalarm.check()
 convertbot.check()
 grotebroer1.check()
 y2k38warning.check()
+maanfase.check()
 
 try:
     #grotebroer1.start_firehose()
@@ -175,7 +176,8 @@ try:
     while True: 
         time.sleep(5)
 except KeyboardInterrupt:
-    cron_executor.log('Exiting')
+    print
+    cron_executor.log('main thread got keyboard interrupt')
 finally:
     cron_executor.stop()
     cron_cet.stop()
