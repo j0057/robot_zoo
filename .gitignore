@@ -1,3 +1,4 @@
 *.pyc
-*.json
+cfg/*.json
+env
 
