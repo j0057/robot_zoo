@@ -4,6 +4,7 @@ import re
 import sys
 import time
 import threading, Queue
+import traceback
 
 import twitter
 
@@ -23,6 +24,7 @@ class CronExecutor(twitter.LoggingObject):
         while True:
             action = self.queue.get()
             if not action:
+                self.log("exiting")
                 break
             try:
                 (f, a, k) = action
@@ -34,10 +36,11 @@ class CronExecutor(twitter.LoggingObject):
                     timeout *= 2
                 else:
                     timeout = 1
-            except:
-                self.error('Starting new executor thread!')
-                self.start_executor()
-                raise
+            except Exception as e:
+                self.error(traceback.format_exc())
+                #self.error('Starting new executor thread!')
+                #self.start()
+                #raise
 
     def put_queue(self, obj):
         self.queue.put(obj)

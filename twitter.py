@@ -30,10 +30,14 @@ class LoggingObject(object):
         if args: 
             message = message.format(*args)
 
-        t = time.asctime()
+        t = time.localtime()
 
         for line in message.split('\n'):
-            print "[{0}] {1}: {2}".format(time.asctime(), self.name, line)
+            print "{0:04}-{1:02}-{2:02} {3:02}:{4:02}:{5:02} [{6}] {7}".format(
+                t.tm_year, t.tm_mon, t.tm_mday,
+                t.tm_hour, t.tm_min, t.tm_sec,
+                self.name,
+                line)
 
         sys.stdout.flush()
 
