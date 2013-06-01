@@ -12,6 +12,7 @@ import hetluchtalarm as _hetluchtalarm
 import convertbot as _convertbot
 import grotebroer1 as _grotebroer1
 import y2k38warning as _y2k38warning
+import maanfase as _maanfase
 
 def parse_args():
     import argparse
@@ -32,6 +33,7 @@ hetluchtalarm = _hetluchtalarm.Luchtalarm('hetluchtalarm')
 convertbot = _convertbot.ConvertBot('convertbot')
 grotebroer1 = _grotebroer1.GroteBroer1('grotebroer1')
 y2k38warning = _y2k38warning.Y2K38Warning('y2k38warning')
+maanfase = _maanfase.Maanfase('maanfase')
 
 cron_executor = pycron.CronExecutor()
 cron_cet= pycron.CronRunner(
@@ -123,6 +125,9 @@ cron_cet= pycron.CronRunner(
     #   ........ ........ ........ ........ ........ ........ ........  @hetluchtalarm
     , ('*        00       12       01       04       2013     *       ', hetluchtalarm.tweede_paasdag_2013)
     , ('*        00       12       01-07    *        *        mon     ', hetluchtalarm.sound_alarm)
+
+    #   ........ ........ ........ ........ ........ ........ ........  @maanfase
+    , ('00       *        *        *        *        *        *       ', maanfase.post_phase)
 
     #   ........ ........ ........ ........ ........ ........ ........  @grotebroer1
     # ('00-59/15 *        *        *        *        *        *       ', grotebroer1.check_dm)
