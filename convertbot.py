@@ -124,7 +124,7 @@ def main():
 
 class ConvertBot(twitter.TwitterAPI):
     def post_time(self, t):
-        if random.randint(0, 59) != 42:
+        if random.randint(0, 2000) != 42:
             return True
 
         base = random.randint(2,36)

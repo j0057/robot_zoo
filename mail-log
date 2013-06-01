@@ -2,13 +2,15 @@
 LOG_FILE="/var/log/robot-zoo.log"
 
 generate_report() {
-    date_str=$(date -d '0 day ago' '+%Y-%m-%d')
-    echo "Subject: Robot zoo log for $date_str"
+    yesterday=$(date -d '1 day ago' '+%Y-%m-%d')
+    today=$(date '+%Y-%m-%d')
+    echo "Subject: Robot zoo log for $today"
     echo "To: $1"
     echo "Content-Type: text/html"
     echo
-    echo "<body><code><pre>"
-    grep "^$date_str" $LOG_FILE
+    echo "<body><code><pre style=\"font-size: 125%\">"
+    grep "^$yesterday (1[2-9]|2[0-3])" $LOG_FILE
+    grep "^$today"                     $LOG_FILE
     echo "</pre></code></body>"
 }
 
