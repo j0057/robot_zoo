@@ -7,11 +7,15 @@ import threading, Queue
 
 import twitter
 
-class CronRunner(twitter.LoggingObject):
-    def start_executor(self):
+class CronExecutor(twitter.LoggingObject):
+    def __init__(self):
+        self.name = 'executor'
+        self.queue = Queue.Queue()
+
+    def start(self):
         threading.Thread(target=self.execute).start()
 
-    def stop_executor(self):
+    def stop(self):
         self.queue.put(None)
 
     def execute(self):
@@ -35,14 +39,20 @@ class CronRunner(twitter.LoggingObject):
                 self.start_executor()
                 raise
 
-    def __init__(self, *rules):
-        self.name = 'main'
-        self.info('-------- -------- -------- -------- -------- -------- -------- ---------------- --------------------------------')
-        self.info('seconds  minutes  hours    monthday month    year     weekday  bot              function                        ')
-        self.info('-------- -------- -------- -------- -------- -------- -------- ---------------- --------------------------------')
+    def put_queue(self, obj):
+        self.queue.put(obj)
+        
+
+class CronRunner(twitter.LoggingObject):
+    def __init__(self, name, executor, *rules):
+        self.name = name
+        self.executor = executor
+        self.stopped = False
+        self.info('--------- --------- --------- --------- --------- --------- --------- ---------------- --------------------------------')
+        self.info('seconds   minutes   hours     monthday  month     year      weekday   bot              function                        ')
+        self.info('--------- --------- --------- --------- --------- --------- --------- ---------------- --------------------------------')
         self.rules = [ self.parse_rule(*r) for r in rules ]
-        self.info('-------- -------- -------- -------- -------- -------- -------- ---------------- --------------------------------')
-        self.queue = Queue.Queue()
+        self.info('--------- --------- --------- --------- --------- --------- --------- ---------------- --------------------------------')
 
     def parse_rule(self, rule, action):
         #r = re.compile(r'(\d\d)?(-(\d\d))?(/(\d\d))?')
@@ -54,7 +64,7 @@ class CronRunner(twitter.LoggingObject):
 
         rule = rule.lower().split()
         name = action.im_self.name if hasattr(action, 'im_self') else ''
-        self.log('{0} {1:16} {2:32}', ' '.join('{0:8}'.format(r) for r in rule), name, action.__name__)
+        self.log('{0} {1:16} {2:32}', ' '.join('{0:9}'.format(r) for r in rule), name, action.__name__)
 
         # replace * with 00-00/01 on the left side of the first non-*
         for (i, v) in enumerate(rule):          
@@ -107,18 +117,24 @@ class CronRunner(twitter.LoggingObject):
     def run_utc(self):
         self.run(time.gmtime)
 
+    def start_utc(self):
+        threading.Thread(target=self.run_utc).start()
+
     def run_local(self):
         self.run(time.localtime)
 
+    def start_local(self):
+        threading.Thread(target=self.run_local).start()
+
+    def stop(self):
+        self.stopped = True
+
     def run(self, get_time):
-        try:
-            while True:
-                time.sleep(1)
-                t = get_time()
-                for action in self.get_runnable_actions(t):
-                    self.queue.put((action, [t], {}))
-        finally:
-            self.queue.put(None)
+        while not self.stopped:
+            time.sleep(1)
+            t = get_time()
+            for action in self.get_runnable_actions(t):
+                self.executor.put_queue((action, [t], {}))
 
 if __name__ == '__main__':
     import re
