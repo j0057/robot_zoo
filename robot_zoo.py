@@ -35,7 +35,7 @@ grotebroer1 = _grotebroer1.GroteBroer1('grotebroer1')
 y2k38warning = _y2k38warning.Y2K38Warning('y2k38warning')
 maanfase = _maanfase.Maanfase('maanfase')
 
-cron_executor = pycron.CronExecutor()
+cron_executor = pycron.CronExecutor(pool_size=4)
 cron_cet= pycron.CronRunner(
     'cron_cet',
     cron_executor,

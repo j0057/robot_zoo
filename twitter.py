@@ -5,6 +5,7 @@ import urllib2
 import re
 import time
 import sys
+import threading
 import urllib2, base64, json, threading, Queue
 
 import oauth2 as oauth
@@ -23,6 +24,8 @@ class LoggingObject(object):
     LEVEL = LEVEL_INFO
     #EVEL = LEVEL_DEBUG
 
+    OUTPUT_LOCK = threading.Lock()
+
     def __log(self, level, message, *args):
         if level > self.LEVEL:
             return
@@ -32,12 +35,13 @@ class LoggingObject(object):
 
         t = time.localtime()
 
-        for line in message.split('\n'):
-            print "{0:04}-{1:02}-{2:02} {3:02}:{4:02}:{5:02} [{6}] {7}".format(
-                t.tm_year, t.tm_mon, t.tm_mday,
-                t.tm_hour, t.tm_min, t.tm_sec,
-                self.name,
-                line)
+        with self.OUTPUT_LOCK:
+            for line in message.split('\n'):
+                print "{0:04}-{1:02}-{2:02} {3:02}:{4:02}:{5:02} [{6}] {7}".format(
+                    t.tm_year, t.tm_mon, t.tm_mday,
+                    t.tm_hour, t.tm_min, t.tm_sec,
+                    self.name,
+                    line)
 
         sys.stdout.flush()
 

@@ -9,38 +9,37 @@ import traceback
 import twitter
 
 class CronExecutor(twitter.LoggingObject):
-    def __init__(self):
+    def __init__(self, pool_size=1):
         self.name = 'executor'
         self.queue = Queue.Queue()
+        self.pool_size = pool_size
 
     def start(self):
-        threading.Thread(target=self.execute).start()
+        for i in range(self.pool_size):
+            threading.Thread(target=self.execute, name="Executor-{0}".format(i)).start()
 
     def stop(self):
-        self.queue.put(None)
+        for i in range(self.pool_size):
+            self.queue.put(None)
 
     def execute(self):
-        timeout = 1
-        while True:
-            action = self.queue.get()
-            if not action:
-                self.log("exiting")
-                break
-            try:
-                (f, a, k) = action
-                if f(*a, **k):
+        try:
+            self.log("{0} starting", threading.currentThread().getName())
+            while True:
+                action = self.queue.get()
+                self.debug("{0}: {1}", threading.currentThread().getName(), action)
+                if not action:
+                    break
+                try:
                     timeout = 1
-                elif timeout <= 8: # try 4 times
-                    self.queue.put((f, a, k))
-                    time.sleep(timeout)
-                    timeout *= 2
-                else:
-                    timeout = 1
-            except Exception as e:
-                self.error(traceback.format_exc())
-                #self.error('Starting new executor thread!')
-                #self.start()
-                #raise
+                    (f, a, k) = action
+                    while (timeout <= 8) and not f(*a, **k):
+                        time.sleep(timeout)
+                        timeout *= 2
+                except Exception as e:
+                    self.error(traceback.format_exc())
+        finally:
+            self.log("{0} exiting", threading.currentThread().getName())
 
     def put_queue(self, obj):
         self.queue.put(obj)
@@ -121,23 +120,27 @@ class CronRunner(twitter.LoggingObject):
         self.run(time.gmtime)
 
     def start_utc(self):
-        threading.Thread(target=self.run_utc).start()
+        threading.Thread(target=self.run_utc, name='CronUTC-0').start()
 
     def run_local(self):
         self.run(time.localtime)
 
     def start_local(self):
-        threading.Thread(target=self.run_local).start()
+        threading.Thread(target=self.run_local, name='CronLocal-0').start()
 
     def stop(self):
         self.stopped = True
 
     def run(self, get_time):
-        while not self.stopped:
-            time.sleep(1)
-            t = get_time()
-            for action in self.get_runnable_actions(t):
-                self.executor.put_queue((action, [t], {}))
+        try:
+            self.log("{0} starting", threading.currentThread().getName())
+            while not self.stopped:
+                time.sleep(1)
+                t = get_time()
+                for action in self.get_runnable_actions(t):
+                    self.executor.put_queue((action, [t], {}))
+        finally:
+            self.log("{0} exiting", threading.currentThread.getName())
 
 if __name__ == '__main__':
     import re

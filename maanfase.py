@@ -58,7 +58,7 @@ class Maanfase(twitter.TwitterAPI):
 
     def post_phase(self, t):
         if self.moon_model.year != t.tm_year:
-            self.log("initializing for year {0}", t.tm_year)
+            self.log("Initializing for year {0}", t.tm_year)
             self.moon_model.initialize(t.tm_year)
 
         result = self.moon_model.get((t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min))
