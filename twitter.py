@@ -75,7 +75,7 @@ class OauthClient(LoggingObject):
         return client
 
     def oauth_request(self, method, url, **get_params):
-        global client
+        #global client # WTF?!! NO!! Maybe this was just for debugging purposes (single-threaded...)
         client = self.create_oauth_client()
 
         body = ''
