@@ -9,8 +9,8 @@ generate_report() {
     echo "Content-Type: text/html"
     echo
     echo "<body><code><pre style=\"font-size: 125%\">"
-    grep "^$yesterday (1[2-9]|2[0-3])" $LOG_FILE
-    grep "^$today"                     $LOG_FILE
+    grep "^$yesterday \\(1[2-9]\\|2[0-3]\\)" $LOG_FILE
+    grep "^$today"                           $LOG_FILE
     echo "</pre></code></body>"
 }
 
