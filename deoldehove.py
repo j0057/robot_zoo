@@ -17,7 +17,7 @@ class DeOldehove(twitter.TwitterAPI):
         sep = sounds['separator']
         snd = sounds['sound']
 
-        stuffing = t.tm_hour if t.tm_min == 30 else 0
+        stuffing = (t.tm_hour or 24) if t.tm_min == 30 else 0
         times = 1 if t.tm_min == 30 else t.tm_hour
         if times > 12: times -= 12
         if times <  1: times += 12
