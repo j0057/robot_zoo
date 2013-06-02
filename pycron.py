@@ -37,7 +37,9 @@ class CronExecutor(twitter.LoggingObject):
                         time.sleep(timeout)
                         timeout *= 2
                 except Exception as e:
-                    self.error(traceback.format_exc())
+                    self.error("Exception on thread {0}:\n{1}",
+                        threading.currentThread().getName(),
+                        traceback.format_exc())
         finally:
             self.log("{0} exiting", threading.currentThread().getName())
 
@@ -140,7 +142,7 @@ class CronRunner(twitter.LoggingObject):
                 for action in self.get_runnable_actions(t):
                     self.executor.put_queue((action, [t], {}))
         finally:
-            self.log("{0} exiting", threading.currentThread.getName())
+            self.log("{0} exiting", threading.currentThread().getName())
 
 if __name__ == '__main__':
     import re

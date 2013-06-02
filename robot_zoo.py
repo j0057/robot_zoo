@@ -177,7 +177,7 @@ try:
         time.sleep(5)
 except KeyboardInterrupt:
     print
-    cron_executor.log('main thread got keyboard interrupt')
+    cron_executor.log('Main thread got keyboard interrupt')
 finally:
     cron_executor.stop()
     cron_cet.stop()
