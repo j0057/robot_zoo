@@ -17,5 +17,5 @@ generate_report() {
 if [ $# -eq 0 ]; then
     generate_report "test@example.com"
 else
-    generate_report "$1" | sendmail "$1"
+    generate_report "$1" | /usr/sbin/sendmail "$1"
 fi

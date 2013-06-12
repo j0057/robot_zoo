@@ -182,7 +182,7 @@ class TwitterAPI(Configuration, OauthClient):
             def caller(*pos_args, **get_args):
                 pos_args = map(str, pos_args)
                 get_args = { k: unicode(v).encode('utf8') for (k,v) in get_args.items() } 
-                url = 'http://api.twitter.com/' + '/'.join(x for x in ['1'] + [path, obj] + pos_args if x) + '.json'
+                url = 'http://api.twitter.com/' + '/'.join(x for x in ['1.1'] + [path, obj] + pos_args if x) + '.json'
 
                 self.debug('--> {0}', name)
                 status, response = self.oauth_request(method, url, **get_args)
