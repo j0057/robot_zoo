@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7 -B
+#!/usr/bin/env python
 
 import time
 
@@ -58,6 +58,9 @@ cron_cet= pycron.CronRunner(
 
     , ('*        00-59/30 09-23    11       aug      2012     *       ', deoldehove.sound_clock_into_the_grave)
     , ('*        00-59/30 00-08    12       aug      2012     *       ', deoldehove.sound_clock_into_the_grave)
+
+    , ('*        00-59/30 09-23    10       aug      2013     *       ', deoldehove.sound_clock_into_the_grave)
+    , ('*        00-59/30 00-08    11       aug      2013     *       ', deoldehove.sound_clock_into_the_grave)
 
     , ('*        00-59/30 *        *        *        *        *       ', deoldehove.sound_clock)
 
