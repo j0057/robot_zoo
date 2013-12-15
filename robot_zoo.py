@@ -169,7 +169,7 @@ if __name__ == '__main__':
     cron_utc = RobotZooUTC('cron_utc', cron_executor)
 
     casio_f91w.check()
-    deoldehove.check()
+    deoldehove.api.check()
     msvlieland.check()
     hetluchtalarm.check()
     convertbot.check()
