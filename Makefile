@@ -10,11 +10,12 @@ debug: env/.requirements
 	env/bin/python robot_zoo.py --debug
 
 unittest: env/.requirements
-	env/bin/python -m unittest discover
+	env/bin/python -m unittest discover --verbose
 
 coverage: env/.requirements
 	env/bin/coverage erase
 	env/bin/coverage run --branch -m unittest discover --verbose
+	env/bin/coverage report
 	env/bin/coverage html 
 
 env:

@@ -200,15 +200,15 @@ class TwitterAPI(Configuration, OauthClient):
 
 # compatibility with some old code
 
-_TWITTER = TwitterAPI()
+#_TWITTER = TwitterAPI()
 
-get_verify          = lambda     : _TWITTER.get_account_verify_credentials()
-post_status         = lambda s   : _TWITTER.post_statuses_update(status=s)
-post_reply_to       = lambda i, s: _TWITTER.post_statuses_update(status=s, in_reply_to_status_id=i)
-get_follower_ids    = lambda     : _TWITTER.get_followers_ids() 
-get_following_ids   = lambda     : _TWITTER.get_friends_ids()
-post_follow_id      = lambda u   : _TWITTER.post_friendships_create(u)
-post_retweet        = lambda i   : _TWITTER.post_statuses_retweet(i)
+#get_verify          = lambda     : _TWITTER.get_account_verify_credentials()
+#post_status         = lambda s   : _TWITTER.post_statuses_update(status=s)
+#post_reply_to       = lambda i, s: _TWITTER.post_statuses_update(status=s, in_reply_to_status_id=i)
+#get_follower_ids    = lambda     : _TWITTER.get_followers_ids() 
+#get_following_ids   = lambda     : _TWITTER.get_friends_ids()
+#post_follow_id      = lambda u   : _TWITTER.post_friendships_create(u)
+#post_retweet        = lambda i   : _TWITTER.post_statuses_retweet(i)
 
 def get_new_mentions_(since_id=''):
     if since_id:

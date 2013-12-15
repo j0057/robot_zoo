@@ -21,11 +21,6 @@ def parse_args():
     parser.add_argument('-d', '--debug', action='store_true', default=False, help='output everything')
     return parser.parse_args()
    
-args = parse_args()
-
-if args.quiet: twitter.LoggingObject.LEVEL = twitter.LoggingObject.LEVEL_ERROR 
-if args.debug: twitter.LoggingObject.LEVEL = twitter.LoggingObject.LEVEL_DEBUG
-
 class RobotZooCET(pycron.CronRunner):
     def __init__(self, name, executor):
         super(RobotZooCET, self).__init__(name, executor,
@@ -162,6 +157,11 @@ y2k38warning = _y2k38warning.Y2K38Warning('y2k38warning')
 maanfase = _maanfase.Maanfase('maanfase')
 
 if __name__ == '__main__':
+
+    args = parse_args()
+
+    if args.quiet: twitter.LoggingObject.LEVEL = twitter.LoggingObject.LEVEL_ERROR 
+    if args.debug: twitter.LoggingObject.LEVEL = twitter.LoggingObject.LEVEL_DEBUG
 
     cron_executor = pycron.CronExecutor(pool_size=4)
 

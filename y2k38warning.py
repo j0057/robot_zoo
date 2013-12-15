@@ -6,7 +6,7 @@ import twitter
 class Y2K38Warning(object):
     def __init__(self, name, api=None):
         self.name = name
-        self.api = api or twitter.TwitterAPI(name)
+        self.api = api if api else twitter.TwitterAPI(name)
 
     def _tweet_remaining(self, left, unit):
         message = "Only {0} {1} remaining until Y2K38!".format(left, unit)
@@ -48,4 +48,5 @@ class Y2K38Warning(object):
     def zero(self, t):
         message = "Y2K38 is here! Watch out for falling airplanes!"
         return self._tweet_message(message)
+
 
