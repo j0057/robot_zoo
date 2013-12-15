@@ -137,7 +137,7 @@ class RobotZooUTC(pycron.CronRunner):
             , ('07       14       03       19-31    12       2037      *       ', y2k38warning.daily)
             , ('07       14       03       01-17    01       2038      *       ', y2k38warning.daily)
             , ('07       14       03-23    18       01       2038      *       ', y2k38warning.hourly)
-            , ('07       14       00-02    19       01       2038      *       ', y2k38warning.hourly)
+            , ('07       14       00-01    19       01       2038      *       ', y2k38warning.hourly)
             , ('07       14-59    02       19       01       2038      *       ', y2k38warning.every_minute)
             , ('07       00-13    03       19       01       2038      *       ', y2k38warning.every_minute)
             , ('07-59    13       03       19       01       2038      *       ', y2k38warning.every_second)
