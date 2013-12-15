@@ -5,14 +5,14 @@ import time
 import twitter
 import pycron
 
-import casio_f91w as _casio_f91w             
-import deoldehove as _deoldehove            
-import msvlieland as _msvlieland
-import hetluchtalarm as _hetluchtalarm
-import convertbot as _convertbot
-import grotebroer1 as _grotebroer1
-import y2k38warning as _y2k38warning
-import maanfase as _maanfase
+from bot import casio_f91w as _casio_f91w             
+from bot import deoldehove as _deoldehove            
+from bot import msvlieland as _msvlieland
+from bot import hetluchtalarm as _hetluchtalarm
+from bot import convertbot as _convertbot
+from bot import grotebroer1 as _grotebroer1
+from bot import y2k38warning as _y2k38warning
+from bot import maanfase as _maanfase
 
 def parse_args():
     import argparse
