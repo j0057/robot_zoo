@@ -12,6 +12,11 @@ debug: env/.requirements
 unittest: env/.requirements
 	env/bin/python -m unittest discover
 
+coverage: env/.requirements
+	env/bin/coverage erase
+	env/bin/coverage run --branch -m unittest discover --verbose
+	env/bin/coverage html 
+
 env:
 	virtualenv env $(QUIET)
 
