@@ -9,6 +9,9 @@ run: env/.requirements
 debug: env/.requirements
 	env/bin/python robot_zoo.py --debug
 
+unittest: env/.requirements
+	env/bin/python -m unittest discover
+
 env:
 	virtualenv env $(QUIET)
 

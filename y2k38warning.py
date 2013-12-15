@@ -3,18 +3,22 @@ import twitter
 
 # 2038-01-19 03:14:07 UTC
 
-class Y2K38Warning(twitter.TwitterAPI):
+class Y2K38Warning(object):
+    def __init__(self, name, api=None):
+        self.name = name
+        self.api = api or twitter.TwitterAPI(name)
+
     def _tweet_remaining(self, left, unit):
         message = "Only {0} {1} remaining until Y2K38!".format(left, unit)
         return self._tweet_message(message)
 
     def _tweet_message(self, message):
         try:
-            self.log("Posting status: {0} ({1})", repr(message), len(message))
-            self.post_statuses_update(status=message)
+            self.api.log("Posting status: {0} ({1})", repr(message), len(message))
+            self.api.post_statuses_update(status=message)
             return True
         except twitter.FailWhale as fail:
-            self.log("FAIL WHALE: {0}", fail.args)
+            self.api.log("FAIL WHALE: {0}", fail.args)
             return False
 
     def yearly(self, t): 
@@ -22,11 +26,11 @@ class Y2K38Warning(twitter.TwitterAPI):
         return self._tweet_remaining(left, 'years' if left != 1 else 'year')
 
     def monthly(self, t): 
-        left = ((1 - t.tm_month) % 12) or 12
+        left = ((1 - t.tm_mon) % 12) or 12
         return self._tweet_remaining(left, 'months' if left != 1 else 'month')
 
     def daily(self, t):
-        left = ((19 - t.tm_day) % 31) or 31
+        left = ((19 - t.tm_mday) % 31) or 31
         return self._tweet_remaining(left, 'days' if left != 1 else 'day')
 
     def hourly(self, t): 
@@ -42,8 +46,6 @@ class Y2K38Warning(twitter.TwitterAPI):
         return self._tweet_remaining(left, 'seconds' if left != 1 else 'second')
 
     def zero(self, t):
-        message = "Y2K38 is here! Watch out for falling airplanes!!!"
+        message = "Y2K38 is here! Watch out for falling airplanes!"
         return self._tweet_message(message)
-
-        
 
