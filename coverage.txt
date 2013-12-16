@@ -1,0 +1,17 @@
+Name                Stmts   Miss Branch BrMiss  Cover
+-----------------------------------------------------
+bot/__init__            0      0      0      0   100%
+bot/casio_f91w        112      0     30      0   100%
+bot/convertbot        115     97     36     25    19%
+bot/deoldehove         30      0      4      0   100%
+bot/grotebroer1       103     80     27     27    18%
+bot/hetluchtalarm      28     19      0      0    32%
+bot/maanfase           60     37     18     14    35%
+bot/msvlieland         20      0      0      0   100%
+bot/y2k38warning       37      0      0      0   100%
+holidays               23      0     17      0   100%
+pycron                115     45     51     17    63%
+robot_zoo              58     32      4      1    47%
+twitter               149     88     44     40    34%
+-----------------------------------------------------
+TOTAL                 850    398    231    124    52%

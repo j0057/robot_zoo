@@ -1,5 +1,7 @@
 QUIET = --quiet
 
+.PHONY: test
+
 test: env/.requirements
 	env/bin/python robot_zoo.py
 
@@ -10,13 +12,13 @@ debug: env/.requirements
 	env/bin/python robot_zoo.py --debug
 
 unittest: env/.requirements
-	env/bin/python -m unittest discover --verbose
+	env/bin/python -m unittest discover
 
 coverage: env/.requirements
 	env/bin/coverage erase
-	env/bin/coverage run --branch -m unittest discover --verbose
-	env/bin/coverage report
+	-env/bin/coverage run --branch '--omit=env/*,test/*' -m unittest discover --verbose
 	env/bin/coverage html 
+	env/bin/coverage report | tee coverage.txt
 
 env:
 	virtualenv env $(QUIET)
@@ -27,5 +29,5 @@ env/.requirements: env requirements.txt
 
 clean:
 	rm -rf env
-	rm -f *.pyc
+	find . -name '*.pyc' -delete
 

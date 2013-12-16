@@ -1,5 +1,5 @@
 #!/bin/bash
-LOG_FILE="/var/log/robot-zoo.log"
+LOG_FILE="${LOG_FILE-/var/log/robot-zoo.log}"
 
 generate_report() {
     yesterday=$(date -d '1 day ago' '+%Y-%m-%d')
@@ -8,9 +8,9 @@ generate_report() {
     echo "To: $1"
     echo "Content-Type: text/html"
     echo
-    echo "<body><code><pre style=\"font-size: 125%\">"
-    grep "^$yesterday \\(1[2-9]\\|2[0-3]\\)" $LOG_FILE
-    grep "^$today"                           $LOG_FILE
+    echo "<body><code><pre>"
+    grep "$yesterday \\(1[2-9]\\|2[0-3]\\)" $LOG_FILE
+    grep "$today"                           $LOG_FILE
     echo "</pre></code></body>"
 }
 

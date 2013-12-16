@@ -43,7 +43,7 @@ class LoggingObject(object):
                     self.name,
                     line)
 
-        sys.stdout.flush()
+            sys.stdout.flush()
 
     _name = None
 

@@ -30,7 +30,8 @@ class RobotZooCET(pycron.CronRunner):
 
             #   ........ ........ ........ ........ ........ ........ ......... @casio_f91w
               ('*        00       *        *        *        *        *       ', casio_f91w.send_beep)
-            # ('05-59/30 *        *        *        *        *        *       ', casio_f91w.handle_mentions)
+            , ('01       00-59/02 *        *        *        *        *       ', casio_f91w.handle_mentions)
+            , ('02       *        *        *        *        *        *       ', casio_f91w.send_alarms)
 
             #   ........ ........ ........ ........ ........ ........ ........  @deoldehove
             , ('*        00-59/30 *        10-12    sep      2010     *       ', deoldehove.sound_clock_lwd_culinair)
@@ -168,9 +169,9 @@ if __name__ == '__main__':
     cron_cet = RobotZooCET('cron_cet', cron_executor)
     cron_utc = RobotZooUTC('cron_utc', cron_executor)
 
-    casio_f91w.check()
+    casio_f91w.api.check()
     deoldehove.api.check()
-    msvlieland.check()
+    msvlieland.api.check()
     hetluchtalarm.check()
     convertbot.check()
     grotebroer1.check()
