@@ -5,12 +5,12 @@ __author__ = 'Joost Molenaar <j.j.molenaar@gmail.com>'
 from datetime import datetime
 
 import ephem
-from dateutil import tz
+import pytz
 
 import twitter
 
-TZ_UTC = tz.gettz('UTC')
-TZ_CET = tz.gettz('Europe/Amsterdam')
+TZ_UTC = pytz.utc
+TZ_CET = pytz.timezone('Europe/Amsterdam')
 
 PHASE_NAME = ['nieuwe maan', 
               'eerste kwartier', 
@@ -18,29 +18,36 @@ PHASE_NAME = ['nieuwe maan',
               'laatste kwartier']
 
 PHASE_FUNC = [ephem.next_new_moon,
-             ephem.next_first_quarter_moon,
-             ephem.next_full_moon,
-             ephem.next_last_quarter_moon]
+              ephem.next_first_quarter_moon,
+              ephem.next_full_moon,
+              ephem.next_last_quarter_moon]
 
 class MoonModel(object):
     def __init__(self, year=None):
-        self.year = None
-        if year is not None:
-            self.initialize(year)
+        self.year = year
 
-    def initialize(self, year):
-        time = ephem.Date(datetime(year, 1, 1, 0, 0, 0, tzinfo=TZ_CET).astimezone(TZ_UTC))
-        phase = self.first_phase(time)
-        self.year = year 
-        self.phases = { (d.year, d.month, d.day, d.hour, d.minute): (d.hour, d.minute, d.second, phase)
-                        for (phase, d) in self.calc_phases(time, phase) }
+    @property
+    def year(self):
+        return self._year
 
-    def first_phase(self, year):
+    @year.setter
+    def year(self, year):
+        self._year = year
+        if year:
+            dt = datetime(year, 1, 1, 0, 0, 0, tzinfo=TZ_CET).astimezone(TZ_UTC)
+            time = ephem.Date(dt)
+            phase = self._first_phase(time)
+            self._phases = { (d.year, d.month, d.day, d.hour, d.minute): (d.hour, d.minute, d.second, phase)
+                             for (phase, d) in self._calc_phases(time, phase) }
+        else:
+            self._phases = {} 
+
+    def _first_phase(self, year):
         times = [ (i, f(year)) for (i, f) in enumerate(PHASE_FUNC) ]
         first = min(times, key=lambda t: t[1])
         return first[0]
 
-    def calc_phases(self, time, phase):
+    def _calc_phases(self, time, phase):
         while True:
             time = PHASE_FUNC[phase](time)
             if time.datetime().replace(tzinfo=TZ_UTC).astimezone(TZ_CET).year != self.year:
@@ -48,41 +55,32 @@ class MoonModel(object):
             yield (phase, time.datetime().replace(tzinfo=TZ_UTC).astimezone(TZ_CET))
             phase = (phase + 1) % 4
 
-    def get(self, key):
-        return self.phases.get(key, None)
+    def __getitem__(self, key):
+        return self._phases.get(key, None)
 
-class Maanfase(twitter.TwitterAPI):
-    def __init__(self, name):
-        super(Maanfase, self).__init__(name)
-        self.moon_model = MoonModel()
+class Maanfase(object):
+    def __init__(self, name, api=None):
+        self.name = name
+        self.api = api if api else twitter.TwitterAPI(name)
+        self.moon = MoonModel()
 
     def post_phase(self, t):
-        if self.moon_model.year != t.tm_year:
-            self.log("Initializing for year {0}", t.tm_year)
-            self.moon_model.initialize(t.tm_year)
+        if self.moon.year != t.tm_year:
+            self.api.log("Initializing for year {0}", t.tm_year)
+            self.moon.year = t.tm_year
 
-        result = self.moon_model.get((t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min))
+        result = self.moon[t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min]
         if not result:
             return True
 
         h, m, s, phase = result
-        status = u"Om {0}:{1}:{2} is het {3}.".format(h, m, s, PHASE_NAME[phase])
+        status = u"Om {0:02}:{1:02}:{2:02} is het {3}.".format(h, m, s, PHASE_NAME[phase])
 
         try:
-            self.log("Posting status: {0} ({1})", repr(status), len(status))
-            self.post_statuses_update(status=status)
+            self.api.log("Posting status: {0} ({1})", repr(status), len(status))
+            self.api.post_statuses_update(status=status)
             return True
         except twitter.FailWhale as fail:
-            self.log("FAIL WHALE: {0}", repr(self.args))
+            fail.log_error(self.api)
             return False
-
-if __name__ == '__main__':
-    mm = MoonModel(2013)
-    ph = mm.first_phase(2013)
-    print ph
-    for x in mm.calc_phases(2013, ph):
-        print x
-
-    from pprint import pprint
-    pprint(mm.phases)
 

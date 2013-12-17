@@ -210,20 +210,20 @@ class TwitterAPI(Configuration, OauthClient):
 #post_follow_id      = lambda u   : _TWITTER.post_friendships_create(u)
 #post_retweet        = lambda i   : _TWITTER.post_statuses_retweet(i)
 
-def get_new_mentions_(since_id=''):
-    if since_id:
-        result = _TWITTER.get_statuses_mentions(count=200, since_id=since_id)
-    else:
-        result = _TWITTER.get_statuses_mentions(count=200)
-	return dict((m['id'], (m['text'], m['user']['screen_name'], m['user']['utc_offset'])) for m in result)
+#def get_new_mentions_(since_id=''):
+#    if since_id:
+#        result = _TWITTER.get_statuses_mentions(count=200, since_id=since_id)
+#    else:
+#        result = _TWITTER.get_statuses_mentions(count=200)
+#	return dict((m['id'], (m['text'], m['user']['screen_name'], m['user']['utc_offset'])) for m in result)
 
-if __name__ == '__main__':
-    LoggingObject.LEVEL = LoggingObject.LEVEL_DEBUG
-
-    twtr = TwitterAPI('johndoeveloper')
-    twtr.get_account_verify_credentials()
-
-    def j(o):
-        import json
-        print json.dumps(o, sort_keys=True, indent=4)
+#if __name__ == '__main__':
+#    LoggingObject.LEVEL = LoggingObject.LEVEL_DEBUG
+#
+#    twtr = TwitterAPI('johndoeveloper')
+#    twtr.get_account_verify_credentials()
+#
+#    def j(o):
+#        import json
+#        print json.dumps(o, sort_keys=True, indent=4)
 

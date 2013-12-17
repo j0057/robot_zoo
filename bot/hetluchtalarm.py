@@ -1,12 +1,10 @@
-#!/usr/bin/env python2.7
-
-__version__ = '0.1'
-__author__ = 'Joost Molenaar <j.j.molenaar@gmail.com>'
-
-import sys, time
 import twitter
 
-class Luchtalarm(twitter.TwitterAPI):
+class Luchtalarm(object):
+    def __init__(self, name, api=None):
+        self.name = name
+        self.api = api if api else twitter.TwitterAPI(name)
+
     def stuffing(self, month, year):
         year -= 2012
         return (unicode(bin(month)[2:].rjust(4, '0')).replace('0', u'\u0020').replace('1', u'\u2002')
@@ -22,19 +20,19 @@ class Luchtalarm(twitter.TwitterAPI):
     def tweede_paasdag_2013(self, t):
         status = "Vandaag als het goed is geen luchtalarm, vrolijk Pasen!"
         try:
-            self.info('Posting status: {0} ({1})', repr(status), len(status))
-            self.post_statuses_update(status=status)
+            self.api.info('Posting status: {0} ({1})', repr(status), len(status))
+            self.api.post_statuses_update(status=status)
             return True
         except twitter.FailWhale as fail:
-            self.error('FAIL WHALE: {0}', fail.args)
+            fail.log_error(self.api)
             return False
     
     def sound_alarm(self, t):
         status = self.luchtalarm(t.tm_mon, t.tm_year)
         try:
-            self.info('Posting status: {0} ({1})', repr(status), len(status))
-            self.post_statuses_update(status=status)
+            self.api.info('Posting status: {0} ({1})', repr(status), len(status))
+            self.api.post_statuses_update(status=status)
             return True
         except twitter.FailWhale as fail:
-            self.error('FAIL WHALE: {0}', fail.args)
+            fail.log_error(self.api)
             return False

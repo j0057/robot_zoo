@@ -172,11 +172,11 @@ if __name__ == '__main__':
     casio_f91w.api.check()
     deoldehove.api.check()
     msvlieland.api.check()
-    hetluchtalarm.check()
-    convertbot.check()
+    hetluchtalarm.api.check()
+    convertbot.api.check()
     grotebroer1.check()
     y2k38warning.api.check()
-    maanfase.check()
+    maanfase.api.check()
 
     try:
         #grotebroer1.start_firehose()

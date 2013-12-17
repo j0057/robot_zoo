@@ -1,5 +1,3 @@
-#!/usr/bin/env python2.7
-
 __version__ = '0.1'
 __author__ = 'Joost Molenaar <j.j.molenaar@gmail.com>'
 
@@ -9,7 +7,12 @@ import random
 
 import twitter
 
-class GroteBroer1(twitter.TwitterAPI, twitter.StreamAPI):
+class GroteBroer1(object):
+    def __init__(self, name, api=None, stream=None):
+        self.name = name
+        self.api = api if api else twitter.TwitterAPI(name)
+        self.stream = stream if stream else twitter.StreamAPI()
+
     def get_stream_auth(self):
         return self.config['login']['username'], self.config['login']['password']
 
@@ -62,16 +65,16 @@ class GroteBroer1(twitter.TwitterAPI, twitter.StreamAPI):
         return True
 
     def dm_print(self, text, sender_screen_name, id, **_):
-        self.info('DM #{0} from {1}: {2} ({3})', id, sender_screen_name, repr(text), len(text))
+        self.api.info('DM #{0} from {1}: {2} ({3})', id, sender_screen_name, repr(text), len(text))
 
     def dm_answer_query(self, text, sender_screen_name, id, **_):
-        return u','.join(self.config['terms'])
+        return u','.join(self.api.config['terms'])
 
     def dm_add_term(self, text, sender_screen_name, id, **_):
         term = text[1:].lower()
-        if term not in self.config['terms']:
-            self.config['terms'].append(term)
-            self.save()
+        if term not in self.api.config['terms']:
+            self.api.config['terms'].append(term)
+            self.api.save()
             return u"Term added: " + term
         else:
             return u"Term already in list: " + term
@@ -79,9 +82,9 @@ class GroteBroer1(twitter.TwitterAPI, twitter.StreamAPI):
     def dm_del_term(self, text, sender_screen_name, id, **_):
         term = text[1:].lower()
         try:
-            index = self.config['terms'].index(term)
-            del self.config['terms'][index]
-            self.save()
+            index = self.api.config['terms'].index(term)
+            del self.api.config['terms'][index]
+            self.api.save()
             return u"Term removed: " + term
         except ValueError:
             return u"Term not in list: " + term
@@ -90,11 +93,11 @@ class GroteBroer1(twitter.TwitterAPI, twitter.StreamAPI):
         return u"Usage: +term | -term | ?"
 
     def dm_send_answer(self, answer, sender_screen_name, id, **_):
-        self.info('DM #{0} to {1}: {2} ({3})', id, sender_screen_name, repr(answer), len(answer))
-        self.post_direct_messages_new(screen_name=sender_screen_name, text=answer)
+        self.api.info('DM #{0} to {1}: {2} ({3})', id, sender_screen_name, repr(answer), len(answer))
+        self.api.post_direct_messages_new(screen_name=sender_screen_name, text=answer)
 
-        self.log("DM #{0} delete", id)
-        self.post_direct_messages_destroy(id)
+        self.api.info("DM #{0} delete", id)
+        self.api.post_direct_messages_destroy(id)
 
     def dm(self):
         handlers = [
@@ -103,17 +106,17 @@ class GroteBroer1(twitter.TwitterAPI, twitter.StreamAPI):
             (self.dm_del_term,      lambda t: t.startswith('-')),
             (self.dm_send_help,     lambda t: True) ]
 
-        for m in self.get_direct_messages():
+        for m in self.api.get_direct_messages():
             self.dm_print(**m)
             answer = next(handler for (handler, cond) in handlers if cond(m['text']))(**m)
             self.dm_send_answer(answer, **m)
 
-    def check_dm(self, t):
+    def check_dm(self, t=None):
         try:
             self.dm()
             return True
         except twitter.FailWhale as fail:
-            self.log('FAIL WHALE: {0}', fail.args)
+            fail.log_error(self.api)
             return False
 
     def follow_suspects(self, t):
