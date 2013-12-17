@@ -174,7 +174,7 @@ if __name__ == '__main__':
     msvlieland.api.check()
     hetluchtalarm.api.check()
     convertbot.api.check()
-    grotebroer1.check()
+    grotebroer1.api.check()
     y2k38warning.api.check()
     maanfase.api.check()
 
