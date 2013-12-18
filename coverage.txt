@@ -10,8 +10,9 @@ bot/maanfase           56      0     14      0   100%
 bot/msvlieland         20      0      0      0   100%
 bot/y2k38warning       37      0      0      0   100%
 holidays               23      0     17      0   100%
+oauth1                 52      0     12      0   100%
 pycron                115     45     51     17    63%
 robot_zoo              58     32      4      1    47%
-twitter               137     78     38     35    35%
+twitter               146     84     38     35    35%
 -----------------------------------------------------
-TOTAL                 748    203    187     69    71%
+TOTAL                 809    209    199     69    72%
