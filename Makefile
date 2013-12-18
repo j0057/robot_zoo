@@ -31,3 +31,5 @@ clean:
 	rm -rf env
 	find . -name '*.pyc' -delete
 
+continuous-%:
+	inotifywait -r . -q -m -e CLOSE_WRITE | grep --line-buffered '^.*\.py$$' | while read line; do clear; date; echo $$line; echo; make $*; done

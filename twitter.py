@@ -8,7 +8,18 @@ import sys
 import threading
 import urllib2, base64, json, threading, Queue
 
+import oauth1
+
 import oauth2 as oauth
+
+# LoggingObject
+#     |
+# OauthClient
+#     |        Configuration
+#     \           |
+#      \         /
+#       \       /
+#       TwitterAPI
 
 class FailWhale(Exception):
     def __init__(self, *args):
@@ -75,9 +86,9 @@ class OauthClient(LoggingObject):
         return client
 
     def oauth_request(self, method, url, **get_params):
-        #global client # WTF?!! NO!! Maybe this was just for debugging purposes (single-threaded...)
         client = self.create_oauth_client()
 
+        # add parameters
         body = ''
         headers = { 'Accept': 'application/json' }
         if (method == 'GET') and get_params:
@@ -87,34 +98,35 @@ class OauthClient(LoggingObject):
             body = urllib.urlencode(get_params)
             headers['Content-Type'] = 'application/x-www-form-urlencoded'
 
-        self.debug('    < {0} {1}', method, url)
-
+        # print debug messages for request
+        debug = u''
+        debug += u'\n    < {0} {1}'.format(method, url)
         for k in sorted(headers.keys()):
-            self.debug('    < {0}: {1}', k.title(), headers[k])
-
+            debug += u'\n    < {0}: {1}'.format(k.title(), headers[k])
         if body:
-            self.debug('')
-            self.debug(unicode(body))
+            debug += u'\n'
+            debug += u'\n' + unicode(body)
 
-        response, content = client.request(url, method=method, body=body, headers=headers)#, force_auth_header=True)
+        # send request
+        response, content = client.request(url, method=method, body=body, headers=headers)
 
+        # print debug messages for response
         for k in sorted(response.keys()):
-            self.debug('    > {0}: {1}', k.title(), response[k])
+            debug += u'\n    > {0}: {1}'.format(k.title(), response[k])
+        self.debug(debug)
 
-        #if 'x-ratelimit-remaining' in response:
-        #    self.log('    remaining API calls: {0}', response['x-ratelimit-remaining'])
-
+        # parse JSON
         if re.match('application/json(; ?charset=utf-8)?', response['content-type'], re.IGNORECASE):
             content = json.JSONDecoder().decode(content.decode('utf8'))
 
+        # return response content
         if 200 <= int(response['status']) < 300:
             status = response['status']
             if 'x-ratelimit-remaining' in response:
                 status += ' (' + response['x-ratelimit-remaining'] + ' left)'
             return status, content
+        # raise error
         else:
-            #for h in response.keys():
-            #    self.error('{1}: {1}', h, response[h])
             for line in str(content).split('\n'):
                 self.error(line)
             raise FailWhale(response['status'], response['content-type'], content)
@@ -157,6 +169,9 @@ class TwitterAPI(Configuration, OauthClient):
                                  self.config['oauth']['token'],
                                  self.config['oauth']['token_secret'])
 
+    API_VERSION = '1.1'
+    API_HOST = 'api.twitter.com'
+
     API_REGEX = r'^(get|post|put|delete)_(statuses|search|direct_messages|followers|friendships|friends|users|favorites|lists|account|saved_searches|trends|geo|blocks|notifications)(.*)'
     API_REGEX = re.compile(API_REGEX)
 
@@ -178,17 +193,35 @@ class TwitterAPI(Configuration, OauthClient):
 
         obj = obj[1:] 
 
+        #def generate_caller(method, path, obj):
+            #def caller(*pos_args, **get_args):
+                #pos_args = map(str, pos_args)
+                #get_args = { k: unicode(v).encode('utf8') for (k,v) in get_args.items() } 
+                #url = 'http://api.twitter.com/' + '/'.join(x for x in ['1.1'] + [path, obj] + pos_args if x) + '.json'
+                #self.debug('--> {0}', name)
+                #status, response = self.oauth_request(method, url, **get_args)
+                #self.debug('<-- {0}: {1}', name, status)
+                #return response
+            #return caller
+
         def generate_caller(method, path, obj):
-            def caller(*pos_args, **get_args):
-                pos_args = map(str, pos_args)
-                get_args = { k: unicode(v).encode('utf8') for (k,v) in get_args.items() } 
-                url = 'http://api.twitter.com/' + '/'.join(x for x in ['1.1'] + [path, obj] + pos_args if x) + '.json'
-
+            def caller(*args, **kwargs):
+                args = map(str, args)
+                kwargs = { k: unicode(v).encode('utf8') for (k, v) in kwargs.items() }
+                url = ('https://'
+                    + TwitterAPI.API_HOST
+                    + '/'
+                    + '/'.join([TwitterAPI.API_VERSION] + [path, obj] + args)
+                    + '.json')
                 self.debug('--> {0}', name)
-                status, response = self.oauth_request(method, url, **get_args)
-                self.debug('<-- {0}: {1}', name, status)
-
-                return response
+                client = oauth1.Oauth1(config=self.config['oauth'])
+                if method == "POST":
+                    response = client.request(method, url, post=kwargs, headers={'Accept': 'application/json'})
+                else:
+                    response = client.request(method, url, get=kwargs, headers={'Accept': 'application/json'})
+                self.debug('<-- {0}: {1}', name, response.status_code)
+                response.raise_for_status()
+                return response.json()
             return caller
 
         return generate_caller(method, path, obj)
@@ -198,32 +231,5 @@ class TwitterAPI(Configuration, OauthClient):
         name = '@' + result['screen_name'].lower()
         assert self.name == name, 'Name according to self is "{0}", but "{1}" according to twitter'.format(self.name, name)
 
-# compatibility with some old code
-
-#_TWITTER = TwitterAPI()
-
-#get_verify          = lambda     : _TWITTER.get_account_verify_credentials()
-#post_status         = lambda s   : _TWITTER.post_statuses_update(status=s)
-#post_reply_to       = lambda i, s: _TWITTER.post_statuses_update(status=s, in_reply_to_status_id=i)
-#get_follower_ids    = lambda     : _TWITTER.get_followers_ids() 
-#get_following_ids   = lambda     : _TWITTER.get_friends_ids()
-#post_follow_id      = lambda u   : _TWITTER.post_friendships_create(u)
-#post_retweet        = lambda i   : _TWITTER.post_statuses_retweet(i)
-
-#def get_new_mentions_(since_id=''):
-#    if since_id:
-#        result = _TWITTER.get_statuses_mentions(count=200, since_id=since_id)
-#    else:
-#        result = _TWITTER.get_statuses_mentions(count=200)
-#	return dict((m['id'], (m['text'], m['user']['screen_name'], m['user']['utc_offset'])) for m in result)
-
-#if __name__ == '__main__':
-#    LoggingObject.LEVEL = LoggingObject.LEVEL_DEBUG
-#
-#    twtr = TwitterAPI('johndoeveloper')
-#    twtr.get_account_verify_credentials()
-#
-#    def j(o):
-#        import json
-#        print json.dumps(o, sort_keys=True, indent=4)
+# TwitterAPI('grotebroer1').create_oauth.client().request('https://stream.twitter.com/1.1/statuses/filter.json?locations=3.27,51.35,7.25,53.6', method='GET', headers={'Accept': 'application/json'})
 
