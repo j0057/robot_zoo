@@ -220,7 +220,6 @@ class TestCasioF91W_Fail(unittest.TestCase):
         self.api.post_statuses_update.side_effect = twitter.FailWhale
         self.api.get_statuses_mentions_timeline.side_effect = twitter.FailWhale
         self.api.config.__getitem__ = lambda s, i: config.__getitem__(i)
-        #elf.api.config.__setitem__ = lambda s, i, v: config.__setitem__(i, v)
         self.casiof91w = bot.casio_f91w.CasioF91W('casiof91w', self.api)
 
     def _time(self, s):
@@ -230,10 +229,8 @@ class TestCasioF91W_Fail(unittest.TestCase):
         t = self._time('2012-07-23T20:00:00Z')
         result = self.casiof91w.send_beep(t)
         self.assertFalse(result)
-        self.api.post_statuses_update.assert_called_once_with(
-            status='BEEP BEEP! MO 23 20:00:00')
-        self.api.error.assert_called_once_with(
-            'FAIL WHALE: {0} {1}', '()', ((),))
+        self.api.post_statuses_update.assert_called_once_with(status='BEEP BEEP! MO 23 20:00:00')
+        self.api.error.assert_called_once_with('FAIL WHALE: {0}', '()')
 
     def test_send_alarms(self):
         t = self._time('2012-07-23T20:00:00Z')

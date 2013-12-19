@@ -18,13 +18,17 @@ def hmac_sha1(key, s):
     return h.digest().encode('base64').strip()
 
 class Oauth1(object):
-    def __init__(self, config={}, nonce=nonce, timestamp=timestamp):
+    def __init__(self, config={}, nonce=nonce, timestamp=timestamp, stream=False):
         self.__dict__.update(config)
 
         self.nonce = nonce
         self.timestamp = timestamp
 
         self.session = requests.Session()
+        self.stream = stream
+
+        self.log_request = lambda request: None
+        self.log_response = lambda response: None
 
     def _create_request(self, method, url, get, post, headers):
         desturl = (url + '?' + urlencode_dict(get)) if get else url
@@ -35,7 +39,9 @@ class Oauth1(object):
 
     def request(self, method, url, get={}, post={}, headers={}):
         request = self._create_request(method, url, get, post, headers)
-        response = self.session.send(request)
+        self.log_request(request)
+        response = self.session.send(request, stream=self.stream)
+        self.log_response(response)
         return response
 
     def _get_oauth_params(self, get, post):

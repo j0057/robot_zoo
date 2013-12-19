@@ -7,70 +7,66 @@ import random
 
 import twitter
 
-class GroteBroer1(object):
-    def __init__(self, name, api=None, stream=None):
+class UserStream(object):
+    def __init__(self, name, api=None, userstream=None):
         self.name = name
         self.api = api if api else twitter.TwitterAPI(name)
-        self.stream = stream if stream else twitter.StreamAPI()
+        self.userstream = userstream if userstream else twitter.UserStreamAPI(name)
 
-    def get_stream_auth(self):
-        return self.config['login']['username'], self.config['login']['password']
+    def userstream_run(self):
+        try:
+            self.userstream_running = True
 
-    def start_firehose(self):
-        def executor():
-            for tweet in self.open_stream('statuses', 'filter', locations='3.27,51.35,7.25,53.6'):
-                if self.firehose is None:
-                    self.log('Firehose exiting')
+            handlers = [
+                (self.userstream_dm_cmd_answer_query,   re.compile(r'^\?$').match),
+                (self.userstream_dm_cmd_add_term,       re.compile(r'^\+[a-z]+$').match),
+                (self.userstream_dm_cmd_del_term,       re.compile(r'^-[a-z]+$').match),
+                (self.userstream_dm_cmd_set_chance,     re.compile(r'(100|[1-9][0-9]?|)%').match),
+                (self.userstream_dm_cmd_send_help,      lambda t: True) ]
+
+            for item in self.userstream.get_user():
+                if not self.userstream_running:
                     break
-                #ith self.lock:
-                if 1:
-                    self.firehose.append(tweet)
+                if not item:
+                    continue
+                if 'direct_message' in item:
+                    m = item['direct_message']
+                    if m['sender']['screen_name'] not in self.api.config['admins']:
+                        continue
+                    self.userstream_dm_print(**m)
+                    answer = next(handler 
+                                  for (handler, cond) in handlers 
+                                  if cond(m['text']))(**m)
+                    self.userstream_dm_send_answer(answer, **m)
+                    self.userstream_dm_delete(**m)
+        finally:
+            self.api.log('Userstream exiting')
 
-        self.lock = threading.Lock()
-        self.firehose = []
-        threading.Thread(target=executor).start()
-        self.log('Started firehose')
+    def userstream_start(self):
+        self.api.log('Userstream starting')
+        threading.Thread(target=self.userstream_run, name='GroteBroer1-UserStream').start()
 
-    def stop_firehose(self):
-        self.firehose = None
-        self.log('Stopped firehose')
+    def userstream_stop(self):
+        self.api.log('Userstream stopping')
+        self.userstream_running = False
 
-    def get_firehose(self):
-        #ith self.lock:
-        if 1:
-            result, self.firehose = self.firehose, []
-        return result
-
-    def handle_suspect(self, tweet):
-        screen_name, id = tweet['user']['screen_name'], tweet['id']
-        self.config['suspects'][screen_name] = id
-        self.save()
-
-    WORDS_REGEX = re.compile(r'[^\w]')
-    def search_firehose(self, t):
-        c,r=0,0
-        for tweet in self.get_firehose():
-            if tweet['entities']['urls']:
-                continue # don't want to help spammers by RT'ing links to bad places
-            c += 1
-            text = tweet['text']
-            words = [ w.lower() for w in self.WORDS_REGEX.split(text) ]
-            for term in self.config['terms']:
-                if term.lower() in words:
-                    r += 1
-                    self.info('#{0} from @{1}: {2}', tweet['id'], tweet['user']['screen_name'], repr(tweet['text']))
-                    self.handle_suspect(tweet)
-                    break
-        self.debug('Firehose: {0}/{1}', c, r)
-        return True
-
-    def dm_print(self, text, sender_screen_name, id, **_):
+    def userstream_dm_print(self, text, sender_screen_name, id, **_):
         self.api.info('DM #{0} from {1}: {2} ({3})', id, sender_screen_name, repr(text), len(text))
 
-    def dm_answer_query(self, text, sender_screen_name, id, **_):
+    @twitter.retry
+    def userstream_dm_send_answer(self, answer, sender_screen_name, id, **_):
+        self.api.info('DM #{0} to {1}: {2} ({3})', id, sender_screen_name, repr(answer), len(answer))
+        self.api.post_direct_messages_new(screen_name=sender_screen_name, text=answer)
+
+    @twitter.retry
+    def userstream_dm_delete(self, id, **_):
+        self.api.info("DM #{0} delete", id)
+        self.api.post_direct_messages_destroy(id=id)
+
+    def userstream_dm_cmd_answer_query(self, text, sender_screen_name, id, **_):
         return u','.join(self.api.config['terms'])
 
-    def dm_add_term(self, text, sender_screen_name, id, **_):
+    def userstream_dm_cmd_add_term(self, text, sender_screen_name, id, **_):
         term = text[1:].lower()
         if term not in self.api.config['terms']:
             self.api.config['terms'].append(term)
@@ -79,7 +75,7 @@ class GroteBroer1(object):
         else:
             return u"Term already in list: " + term
 
-    def dm_del_term(self, text, sender_screen_name, id, **_):
+    def userstream_dm_cmd_del_term(self, text, sender_screen_name, id, **_):
         term = text[1:].lower()
         try:
             index = self.api.config['terms'].index(term)
@@ -89,54 +85,76 @@ class GroteBroer1(object):
         except ValueError:
             return u"Term not in list: " + term
 
-    def dm_send_help(self, text, sender_screen_name, id, **_):
+    def userstream_dm_cmd_set_chance(self, text, sender_screen_name, id, **_):
+        chance = int(text[:-1])
+        self.api.config["chance"] = chance
+        self.api.save()
+        return u"Retweet/follow chance is now {0}%".format(chance)
+
+    def userstream_dm_cmd_send_help(self, text, sender_screen_name, id, **_):
         return u"Usage: +term | -term | ?"
 
-    def dm_send_answer(self, answer, sender_screen_name, id, **_):
-        self.api.info('DM #{0} to {1}: {2} ({3})', id, sender_screen_name, repr(answer), len(answer))
-        self.api.post_direct_messages_new(screen_name=sender_screen_name, text=answer)
+class Firehose(object):
+    def __init__(self, name, api=None, stream=None):
+        self.name = name
+        self.api = api if api else twitter.TwitterAPI(name)
+        self.stream = stream if stream else twitter.StreamAPI(name)
 
-        self.api.info("DM #{0} delete", id)
-        self.api.post_direct_messages_destroy(id)
-
-    def dm(self):
-        handlers = [
-            (self.dm_answer_query,  lambda t: t == '?'),
-            (self.dm_add_term,      lambda t: t.startswith('+')),
-            (self.dm_del_term,      lambda t: t.startswith('-')),
-            (self.dm_send_help,     lambda t: True) ]
-
-        for m in self.api.get_direct_messages():
-            self.dm_print(**m)
-            answer = next(handler for (handler, cond) in handlers if cond(m['text']))(**m)
-            self.dm_send_answer(answer, **m)
-
-    def check_dm(self, t=None):
+    def firehose_run(self):
         try:
-            self.dm()
+            for tweet in self.stream.get_statuses_filter(locations='3.27,51.35,7.25,53.6'):
+                if not self.firehose_running:
+                    break
+                if not tweet:
+                    continue
+                if not self.firehose_regex:
+                    continue
+                if self.firehose_search(tweet):
+                    self.firehose_handle_suspect(tweet)
+        finally:
+            self.api.info('Firehose exiting')
+
+    def firehose_start(self):
+        self.api.info('Firehose starting')
+        self.firehose_running = True
+        self.firehose_regex = ''
+        threading.Thread(target=self.firehose_run, name='GroteBroer1-Firehose').start()
+
+    def firehose_stop(self):
+        self.api.info('Firehose stopping')
+        self.firehose_running = False
+
+    def firehose_search(self, tweet):
+        if self.firehose_terms.search(tweet['text']):
+            self.api.info('Firehose match: #{0} from {1}: {2!r}', tweet['id'], tweet['user']['screen_name'], tweet['text'])
             return True
-        except twitter.FailWhale as fail:
-            fail.log_error(self.api)
-            return False
+  
+    @twitter.retry 
+    def firehose_retweet(self, tweet):
+        self.api.info('Firehose retweeting #{0} from @{1}', tweet['id'], tweet['user']['screen_name'])
+        self.api.post_statuses_retweet(tweet['id'])
 
-    def follow_suspects(self, t):
-        for screen_name, id in list(self.config['suspects'].items()):
-            if random.randint(0, 10) < 1:
-                try:
-                    self.info('Retweeting #{0} from @{1}', id, screen_name)
-                    self.post_statuses_retweet(id)
-                except twitter.FailWhale as fail:
-                    fail.log_error(self)
+    @twitter.retry
+    def firehose_follow(self, tweet):
+        self.api.info('Following user @{0}', tweet['user']['screen_name'])
+        self.api.post_friendships_create(screen_name=tweet['user']['screen_name'])
+ 
+    def firehose_handle_suspect(self, tweet, randint=random.randint):
+        if randint(1, 100) <= self.api.config["chance"]:
+            self.firehose_retweet(tweet)
+            self.firehose_follow(tweet)
 
-                try:
-                    self.info('Following user @{0}', screen_name)
-                    self.post_friendships_create(screen_name=screen_name)
-                except twitter.FailWhale as fail:
-                    fail.log_error(self)
-
-            del self.config['suspects'][screen_name]
-            self.save()
+    def firehose_update(self, t):
+        firehose_regex = r'\b(?:' + '|'.join(self.api.config['terms']) + r')\b'
+        if self.firehose_regex != firehose_regex:
+            self.api.info('Firehose new regex: {0!r}', firehose_regex)
+            self.firehose_regex = firehose_regex
+            self.firehose_terms = re.compile(firehose_regex)
         return True
 
-                
-
+class GroteBroer1(object):
+    def __init__(self, name, api=None):
+        self.name = name
+        self.api = api if api else twitter.TwitterAPI(name)
+        self.firehose = Firehose(name, api=self.api)
+        self.userstream = UserStream(name, api=self.api)

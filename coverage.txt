@@ -4,15 +4,15 @@ bot/__init__            0      0      0      0   100%
 bot/casio_f91w        112      0     30      0   100%
 bot/convertbot         25      0      2      0   100%
 bot/deoldehove         30      0      4      0   100%
-bot/grotebroer1       107     48     27     16    52%
+bot/grotebroer1       120     44     32     20    58%
 bot/hetluchtalarm      28      0      0      0   100%
 bot/maanfase           56      0     14      0   100%
 bot/msvlieland         20      0      0      0   100%
 bot/y2k38warning       37      0      0      0   100%
 holidays               23      0     17      0   100%
-oauth1                 52      0     12      0   100%
+oauth1                 57      0     16      0   100%
 pycron                115     45     51     17    63%
-robot_zoo              58     32      4      1    47%
-twitter               146     84     38     35    35%
+robot_zoo              62     36      4      1    44%
+twitter               140     66     28     25    46%
 -----------------------------------------------------
-TOTAL                 809    209    199     69    72%
+TOTAL                 825    191    198     63    75%

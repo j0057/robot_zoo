@@ -118,9 +118,7 @@ class RobotZooCET(pycron.CronRunner):
             , ('00       *        *        *        *        *        *       ', maanfase.post_phase)
 
             #   ........ ........ ........ ........ ........ ........ ........  @grotebroer1
-            # ('00-59/15 *        *        *        *        *        *       ', grotebroer1.check_dm)
-            # ('00-59/20 *        *        *        *        *        *       ', grotebroer1.search_firehose)
-            # ('05       *        *        *        *        *        *       ', grotebroer1.follow_suspects)
+            , ('00-59/15 *        *        *        *        *        *       ', grotebroer1.firehose.firehose_update)
 
             #   -------- -------- -------- -------- -------- -------- --------
         )
@@ -179,7 +177,8 @@ if __name__ == '__main__':
     maanfase.api.check()
 
     try:
-        #grotebroer1.start_firehose()
+        grotebroer1.firehose.firehose_start()
+        grotebroer1.userstream.userstream_start()
         cron_executor.start()
         cron_cet.start_local()
         cron_utc.start_utc()
@@ -192,4 +191,5 @@ if __name__ == '__main__':
         cron_executor.stop()
         cron_cet.stop()
         cron_utc.stop()
-        #grotebroer1.stop_firehose()
+        grotebroer1.userstream.userstream_stop()
+        grotebroer1.firehose.firehose_stop()
