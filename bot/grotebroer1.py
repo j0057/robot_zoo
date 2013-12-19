@@ -102,6 +102,7 @@ class Firehose(object):
 
     def firehose_run(self):
         try:
+            self.firehose_running = True
             for tweet in self.stream.get_statuses_filter(locations='3.27,51.35,7.25,53.6'):
                 if not self.firehose_running:
                     break
@@ -116,7 +117,6 @@ class Firehose(object):
 
     def firehose_start(self):
         self.api.info('Firehose starting')
-        self.firehose_running = True
         self.firehose_regex = ''
         threading.Thread(target=self.firehose_run, name='GroteBroer1-Firehose').start()
 
