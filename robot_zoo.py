@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import time
+from threading import Thread
 
 import twitter
 import pycron
@@ -118,7 +119,7 @@ class RobotZooCET(pycron.CronRunner):
             , ('00       *        *        *        *        *        *       ', maanfase.post_phase)
 
             #   ........ ........ ........ ........ ........ ........ ........  @grotebroer1
-            , ('00-59/15 *        *        *        *        *        *       ', grotebroer1.firehose.firehose_update)
+            , ('00-59/15 *        *        *        *        *        *       ', grotebroer1.firehose.update)
 
             #   -------- -------- -------- -------- -------- -------- --------
         )
@@ -162,10 +163,10 @@ if __name__ == '__main__':
     if args.quiet: twitter.LoggingObject.LEVEL = twitter.LoggingObject.LEVEL_ERROR 
     if args.debug: twitter.LoggingObject.LEVEL = twitter.LoggingObject.LEVEL_DEBUG
 
-    cron_executor = pycron.CronExecutor(pool_size=4)
+    executor = pycron.CronExecutor(pool_size=4)
 
-    cron_cet = RobotZooCET('cron_cet', cron_executor)
-    cron_utc = RobotZooUTC('cron_utc', cron_executor)
+    cron_cet = RobotZooCET('cron_cet', executor)
+    cron_utc = RobotZooUTC('cron_utc', executor)
 
     casio_f91w.api.check()
     deoldehove.api.check()
@@ -177,19 +178,22 @@ if __name__ == '__main__':
     maanfase.api.check()
 
     try:
-        grotebroer1.firehose.firehose_start()
-        grotebroer1.userstream.userstream_start()
-        cron_executor.start()
-        cron_cet.start_local()
-        cron_utc.start_utc()
+        cron_cet.start(time.localtime)
+        cron_utc.start(time.gmtime)
+
+        grotebroer1.userstream.start()
+        grotebroer1.firehose.start()
+
+        executor.start()
+
         while True: 
             time.sleep(5)
     except KeyboardInterrupt:
         print
-        cron_executor.log('Main thread got keyboard interrupt')
+        executor.log('Main thread got keyboard interrupt')
     finally:
-        cron_executor.stop()
+        executor.stop()
         cron_cet.stop()
         cron_utc.stop()
-        grotebroer1.userstream.userstream_stop()
-        grotebroer1.firehose.firehose_stop()
+        grotebroer1.userstream.stop()
+        grotebroer1.firehose.stop()

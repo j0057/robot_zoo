@@ -16,13 +16,13 @@ class CronExecutor(twitter.LoggingObject):
 
     def start(self):
         for i in range(self.pool_size):
-            threading.Thread(target=self.execute, name="Executor-{0}".format(i)).start()
+            threading.Thread(target=self.run, name="Executor-{0}".format(i)).start()
 
     def stop(self):
         for i in range(self.pool_size):
             self.queue.put(None)
 
-    def execute(self):
+    def run(self):
         try:
             self.log("{0} starting", threading.currentThread().getName())
             while True:
@@ -118,17 +118,11 @@ class CronRunner(twitter.LoggingObject):
                     prev_owner = curr_owner
                     yield action
 
-    def run_utc(self):
-        self.run(time.gmtime)
-
-    def start_utc(self):
-        threading.Thread(target=self.run_utc, name='CronUTC-0').start()
-
-    def run_local(self):
-        self.run(time.localtime)
-
-    def start_local(self):
-        threading.Thread(target=self.run_local, name='CronLocal-0').start()
+    threadnum = 0
+    def start(self, get_time):
+        name = 'Cron-{0}'.format(CronRunner.threadnum) 
+        CronRunner.threadnum += 1
+        threading.Thread(name=name, target=self.run, args=[get_time]).start()
 
     def stop(self):
         self.stopped = True
@@ -143,13 +137,4 @@ class CronRunner(twitter.LoggingObject):
                     self.executor.put_queue((action, [t], {}))
         finally:
             self.log("{0} exiting", threading.currentThread().getName())
-
-if __name__ == '__main__':
-    import re
-    T = '00-59/01 00-59 00 00/15 00-00/01 /15'.split()
-    r = re.compile(r'(\d\d)?(-(\d\d))?(/(\d\d))?')
-    for t in T:
-        print '{0:10}'.format(t),
-        f, _, t, _, s = r.match(t).groups()
-        print 'f:', f, 't:', t, 's:', s
 

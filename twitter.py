@@ -22,7 +22,8 @@ import oauth1
 
 class FailWhale(Exception):
     def __init__(self, *args):
-        Exception.__init__(self, args)
+        super(FailWhale, self).__init__(args)
+
     def log_error(self, obj):
         obj.error('FAIL WHALE: {0}', str(self))
 
@@ -31,8 +32,7 @@ def retry(f):
         t = 1
         while t < 32:
             try:
-                f(self, *a, **k)
-                break
+                return f(self, *a, **k)
             except FailWhale as fail:
                 fail.log_error(self.api)
                 time.sleep(t)
@@ -156,8 +156,8 @@ class TwitterAPI(Configuration, LoggingObject):
                         content = response.json()
                     response.raise_for_status()
                     return content
-                except requests.RequestException as e:
-                    raise FailWhale(content or e)
+                except Exception as e:
+                    raise FailWhale(content, e)
             caller.name = name
             return caller
 
@@ -184,9 +184,14 @@ class TwitterAPI(Configuration, LoggingObject):
         self.debug(msg)
 
     def check(self):
+        self.info('Checking account')
         result = self.get_account_verify_credentials()
         name = '@' + result['screen_name'].lower()
-        assert self.name == name, 'Name according to self is "{0}", but "{1}" according to twitter'.format(self.name, name)
+        #assert self.name == name, 'Name according to self is "{0}", but "{1}" according to twitter'.format(self.name, name)
+        if self.name != name:
+            self.error('Name according to self is {0!r}, but {1!r} according to twitter',
+                name, self.name)
+        return True
 
 class StreamAPI(TwitterAPI):
     API_HOST = 'stream.twitter.com'
