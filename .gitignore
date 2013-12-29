@@ -4,3 +4,5 @@ env
 htmlcov
 *.swp
 
+*.png
+*.log
