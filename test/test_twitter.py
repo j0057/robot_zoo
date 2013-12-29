@@ -32,7 +32,7 @@ class TestRetry(unittest.TestCase):
     def test_fail(self):
         with mock.patch('time.sleep'):
             r = self.albatross()
-        self.assertEqual(r, None)
+        self.assertFalse(r)
 
     def test_ultimately_ok(self):
         with mock.patch('time.sleep'):
@@ -50,4 +50,9 @@ class TestTwitterAPI(unittest.TestCase):
         with mock.patch('oauth1.Oauth1') as oauth1:
             self.api.post_statuses_update(status=u'test')
 
-            oauth1.assert_called_with()
+            oauth1.assert_called_with(config=mock.ANY, stream=False)
+            oauth1.return_value.request.assert_called_with(
+                'POST',
+                'https://api.twitter.com/1.1/statuses/update.json',
+                headers={'Accept': 'application/json'},
+                post={'status': 'test'})

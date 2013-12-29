@@ -31,15 +31,12 @@ class CasioF91W(object):
         self.name = name
         self.api = api if api else twitter.TwitterAPI(name)
 
-    def send_beep(self, date):
-        try:
-            status = self.MSG.format(self.DAYS[date.tm_wday], date.tm_mday, date.tm_hour, date.tm_min)
-            self.api.log('Posting status: {0} ({1})', repr(status), len(status))
-            self.api.post_statuses_update(status=status)
-            return True
-        except twitter.FailWhale as fail:
-            fail.log_error(self.api)
-            return False
+    @twitter.retry
+    def send_beep(self, t):
+        status = self.MSG.format(self.DAYS[t.tm_wday], t.tm_mday, t.tm_hour, t.tm_min)
+        self.api.log('Posting status: {0} ({1})', repr(status), len(status))
+        self.api.post_statuses_update(status=status)
+        return True
 
     def save_alarm(self, alarm, mention):
         key = '{0:02}:{1:02}'.format(*alarm)
@@ -103,21 +100,19 @@ class CasioF91W(object):
             self.api.config['last_mention'] = str(max(int(m['id']) for m in mentions))
         return mentions
 
+    @twitter.retry
     def handle_mentions(self, t):
-        try:
-            dirty = False
-            for m in self.get_mentions():
-                alarm, mention = self.parse_tweet_for_alarm(m)
-                if alarm:
-                    self.save_alarm(alarm, mention)
-                    dirty = True
-            if dirty:
-                self.api.save()
-            return True
-        except twitter.FailWhale as fail:
-            fail.log_error(self.api)
-            return False
+        dirty = False
+        for m in self.get_mentions():
+            alarm, mention = self.parse_tweet_for_alarm(m)
+            if alarm:
+                self.save_alarm(alarm, mention)
+                dirty = True
+        if dirty:
+            self.api.save()
+        return True
 
+    @twitter.retry
     def send_alarms(self, t):
         key = '{0:02}:{1:02}'.format(t.tm_hour, t.tm_min)
         if key in self.api.config['alarms']:
@@ -125,12 +120,9 @@ class CasioF91W(object):
                 status = u'@{0}'.format(screen_name)
                 while len(status) < 130:
                     status += u' BEEP BEEP!'
-                try:
-                    self.api.log('Posting status: {0} ({1})', repr(status), len(status))
-                    self.api.post_statuses_update(status=status, in_reply_to_status_id=tid)
-                    del self.api.config['alarms'][key][tid]
-                except twitter.FailWhale as fail:
-                    fail.log_error(self.api)
+                self.api.log('Posting status: {0} ({1})', repr(status), len(status))
+                self.api.post_statuses_update(status=status, in_reply_to_status_id=tid)
+                del self.api.config['alarms'][key][tid]
                 if not self.api.config['alarms'][key]:
                     del self.api.config['alarms'][key]
             self.api.save()

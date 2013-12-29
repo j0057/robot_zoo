@@ -98,4 +98,4 @@ class Y2K38WarningFail(unittest.TestCase):
 
     def test_fail_whale(self):
         self.y2k38warning.every_second(self._time('2038-01-19T03:14:06Z'))
-        self.api.log.assert_called_with('FAIL WHALE: {0}', ((),))
+        self.api.log.assert_called_with('FAIL WHALE: {0}', ())

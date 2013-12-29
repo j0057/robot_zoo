@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import time
-from threading import Thread
+#from threading import Thread
+import threading
 
 import twitter
 import pycron
@@ -14,6 +15,7 @@ from bot import convertbot as _convertbot
 from bot import grotebroer1 as _grotebroer1
 from bot import y2k38warning as _y2k38warning
 from bot import maanfase as _maanfase
+from bot import geotweets as _geotweets
 
 def parse_args():
     import argparse
@@ -119,7 +121,13 @@ class RobotZooCET(pycron.CronRunner):
             , ('00       *        *        *        *        *        *       ', maanfase.post_phase)
 
             #   ........ ........ ........ ........ ........ ........ ........  @grotebroer1
-            , ('00-59/15 *        *        *        *        *        *       ', grotebroer1.firehose.update)
+            , ('01-59/15 *        *        *        *        *        *       ', grotebroer1.update_regex)
+            , ('00       *        *        *        *        *        *       ', grotebroer1.log_stats)
+            , ('02       00       00       00       *        *        *       ', grotebroer1.truncate_stats)
+
+            #   ........ ........ ........ ........ ........ ........ ........  geotweets
+            , ('05       *        *        *        *        *        *       ', geotweets.save_raw)
+            , ('04       *        *        *        *        *        *       ', geotweets.create_viz)
 
             #   -------- -------- -------- -------- -------- -------- --------
         )
@@ -155,6 +163,7 @@ convertbot = _convertbot.ConvertBot('convertbot')
 grotebroer1 = _grotebroer1.GroteBroer1('grotebroer1')
 y2k38warning = _y2k38warning.Y2K38Warning('y2k38warning')
 maanfase = _maanfase.Maanfase('maanfase')
+geotweets = _geotweets.GeoTweets('johndoeveloper')
 
 if __name__ == '__main__':
 
@@ -176,6 +185,7 @@ if __name__ == '__main__':
     grotebroer1.api.check()
     y2k38warning.api.check()
     maanfase.api.check()
+    geotweets.api.check()
 
     try:
         cron_cet.start(time.localtime)
@@ -183,11 +193,19 @@ if __name__ == '__main__':
 
         grotebroer1.userstream.start()
         grotebroer1.firehose.start()
+        grotebroer1.inspector.start(count=1)
+
+        cancel = [ geotweets.firehose(),
+                   geotweets.process() ]
 
         executor.start()
 
+        time.sleep(30)
+        for thread in threading.enumerate():
+            print thread, thread.name
+
         while True: 
-            time.sleep(5)
+            time.sleep(1)
     except KeyboardInterrupt:
         print
         executor.log('Main thread got keyboard interrupt')
@@ -197,3 +215,5 @@ if __name__ == '__main__':
         cron_utc.stop()
         grotebroer1.userstream.stop()
         grotebroer1.firehose.stop()
+        grotebroer1.inspector.stop()
+        map(lambda cancel: cancel(), cancel)

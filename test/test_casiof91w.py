@@ -227,19 +227,22 @@ class TestCasioF91W_Fail(unittest.TestCase):
 
     def test_send_beep(self):
         t = self._time('2012-07-23T20:00:00Z')
-        result = self.casiof91w.send_beep(t)
-        self.assertFalse(result)
-        self.api.post_statuses_update.assert_called_once_with(status='BEEP BEEP! MO 23 20:00:00')
-        self.api.error.assert_called_once_with('FAIL WHALE: {0}', '()')
+        with mock.patch('time.sleep'):
+            result = self.casiof91w.send_beep(t)
+            self.assertFalse(result)
+            self.api.post_statuses_update.assert_called_with(status='BEEP BEEP! MO 23 20:00:00')
+            self.api.error.assert_called_with('FAIL WHALE: {0}', '')
 
     def test_send_alarms(self):
         t = self._time('2012-07-23T20:00:00Z')
-        result = self.casiof91w.send_alarms(t)
-        self.assertTrue(result)
+        with mock.patch('time.sleep'):
+            result = self.casiof91w.send_alarms(t)
+            self.assertFalse(result)
 
     def test_handle_mentions(self):
         t = self._time('2012-07-23T20:00:00Z')
-        result = self.casiof91w.handle_mentions(t)
-        self.assertFalse(result)
+        with mock.patch('time.sleep'):
+            result = self.casiof91w.handle_mentions(t)
+            self.assertFalse(result)
 
     

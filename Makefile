@@ -15,10 +15,11 @@ unittest: env/.requirements
 	env/bin/python -m unittest discover
 
 coverage: env/.requirements
-	@env/bin/coverage erase
-	@env/bin/coverage run --branch '--omit=env/*,test/*' -m unittest discover || true 
-	@env/bin/coverage html 
-	@env/bin/coverage report | tee coverage.txt
+	env/bin/coverage erase
+	env/bin/coverage run --branch '--omit=env/*,test/*' -m unittest discover || true 
+	env/bin/coverage html 
+	env/bin/coverage annotate
+	env/bin/coverage report | tee coverage.txt
 
 env:
 	virtualenv env $(QUIET)

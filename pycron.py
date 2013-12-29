@@ -24,10 +24,10 @@ class CronExecutor(twitter.LoggingObject):
 
     def run(self):
         try:
-            self.log("{0} starting", threading.currentThread().getName())
+            self.log("{0} starting, #{1}", threading.current_thread().name, twitter.gettid())
             while True:
                 action = self.queue.get()
-                self.debug("{0}: {1}", threading.currentThread().getName(), action)
+                self.debug("{0}: {1}", threading.current_thread().name, action)
                 if not action:
                     break
                 try:
@@ -38,10 +38,10 @@ class CronExecutor(twitter.LoggingObject):
                         timeout *= 2
                 except Exception as e:
                     self.error("Exception on thread {0}:\n{1}",
-                        threading.currentThread().getName(),
+                        threading.current_thread().name,
                         traceback.format_exc())
         finally:
-            self.log("{0} exiting", threading.currentThread().getName())
+            self.log("{0} exiting", threading.current_thread().name)
 
     def put_queue(self, obj):
         self.queue.put(obj)
@@ -129,10 +129,14 @@ class CronRunner(twitter.LoggingObject):
 
     def run(self, get_time):
         try:
-            self.log("{0} starting", threading.currentThread().getName())
+            self.log("{0} starting, #{1}", threading.currentThread().getName(), twitter.gettid())
+            prev = None
             while not self.stopped:
-                time.sleep(1)
+                time.sleep(0.5)
                 t = get_time()
+                if t.tm_sec == prev:
+                    continue
+                prev = t.tm_sec
                 for action in self.get_runnable_actions(t):
                     self.executor.put_queue((action, [t], {}))
         finally:

@@ -1,4 +1,5 @@
 
+import ctypes
 import json
 import urllib
 import urllib2
@@ -21,23 +22,47 @@ import oauth1
 #       TwitterAPI
 
 class FailWhale(Exception):
-    def __init__(self, *args):
-        super(FailWhale, self).__init__(args)
-
     def log_error(self, obj):
         obj.error('FAIL WHALE: {0}', str(self))
 
 def retry(f):
     def retry(self, *a, **k):
         t = 1
+        i = 1
         while t < 32:
             try:
+                if i > 1:
+                    self.api.log('Attempt {0}, t={1}', i, t)
                 return f(self, *a, **k)
             except FailWhale as fail:
                 fail.log_error(self.api)
                 time.sleep(t)
                 t *= 2
+                i += 1
+        return False
     return retry
+
+class Cancellation(object):
+    canceled = False
+    def __nonzero__(self):
+        return self.canceled
+    def cancel(self):
+        self.canceled = True
+
+def task(name):
+    def task(f):
+        def task(self):
+            cancel = Cancellation()
+            thread = threading.Thread(name=name.format(task.i), target=f, args=[self, cancel])
+            thread.start()
+            task.i += 1
+            return cancel.cancel
+        task.i = 0
+        return task
+    return task
+
+def gettid():
+    return ctypes.CDLL('libc.so.6').syscall(186)
 
 class LoggingObject(object):
     LEVEL_DEBUG = 2
@@ -139,16 +164,17 @@ class TwitterAPI(Configuration, LoggingObject):
                     + '/'
                     + '/'.join(item for item in ([self.API_VERSION] + [path, obj] + args) if item)
                     + '.json')
-                self.debug('--> {0}: {1}', name, url)
-                client = oauth1.Oauth1(config=self.config['oauth'], stream=self.API_STREAM)
-                client.log_request = self.log_request
-                client.log_response = self.log_response
-                if method == "POST":
-                    response = client.request(method, url, post=kwargs, headers={'Accept': 'application/json'})
-                else:
-                    response = client.request(method, url, get=kwargs, headers={'Accept': 'application/json'})
-                self.debug('<-- {0}: {1}', name, response.status_code)
                 try:
+                    self.debug('--> {0}: {1}', name, url)
+                    client = oauth1.Oauth1(config=self.config['oauth'], stream=self.API_STREAM)
+                    client.log_request = self.log_request
+                    client.log_response = self.log_response
+                    if method == "POST":
+                        response = client.request(method, url, post=kwargs, headers={'Accept': 'application/json'})
+                    else:
+                        response = client.request(method, url, get=kwargs, headers={'Accept': 'application/json'})
+                    self.debug('<-- {0}: {1}', name, response.status_code)
+
                     content = None
                     if self.API_STREAM:
                         content = (self.try_json_decode(message) for message in response.iter_lines(chunk_size=1))
