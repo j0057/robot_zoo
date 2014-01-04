@@ -1,15 +1,7 @@
-#!/usr/bin/env python
-
-__version__ = '0.2'
-__author__ = 'Joost Molenaar <j.j.molenaar@gmail.com>'
-
-# Version history:
-# 0.1    initial version with hourly beep and alarm
-# 0.2    moved twitter code to module twitter.py
-
 import time
 import re
 import datetime
+import logging
 
 import pytz
 
@@ -29,12 +21,13 @@ class CasioF91W(object):
 
     def __init__(self, name, api=None):
         self.name = name
-        self.api = api if api else twitter.TwitterAPI(name)
+        self.log = logging.getLogger(__name__)
+        self.api = api if api else twitter.TwitterAPI(name, self.log)
 
     @twitter.retry
     def send_beep(self, t):
         status = self.MSG.format(self.DAYS[t.tm_wday], t.tm_mday, t.tm_hour, t.tm_min)
-        self.api.log('Posting status: {0} ({1})', repr(status), len(status))
+        self.log.info('Posting status: %s (%d)', repr(status), len(status))
         self.api.post_statuses_update(status=status)
         return True
 
@@ -50,7 +43,7 @@ class CasioF91W(object):
 
         match = self.R1.search(text) # hh:mm <+|->hhmm
         if match:
-            self.api.log('Alarm: #{0} from @{1}: {2} --> {3}', id, screen_name, repr(text), match.groups())
+            self.log.info('Alarm: #%d from @%s: %s --> %r', id, screen_name, repr(text), match.groups())
             th, tm, sign, zh, zm = match.groups()
             th, tm = int(th), int(tm)
             zh, zm = int(zh), int(zm)
@@ -62,6 +55,7 @@ class CasioF91W(object):
         
         match = self.R2.search(text) # hh:mm <AM|PM> <+|->hhmm
         if match:
+            self.log.info('Alarm: #%d from @%s: %s --> %r', id, screen_name, repr(text), match.groups())
             th, tm, am_pm, sign, zh, zm = match.groups()
             th, tm = int(th), int(tm)
             zh, zm = int(zh), int(zm)
@@ -75,6 +69,7 @@ class CasioF91W(object):
 
         match = self.R3.search(text) # hh:mm <AM|PM>
         if match:
+            self.log.info('Alarm: #%d from @%s: %s --> %r', id, screen_name, repr(text), match.groups())
             th, tm, am_pm = match.groups()
             th, tm = int(th), int(tm)
             if am_pm == 'AM' and th == 12: th -= 12
@@ -83,7 +78,7 @@ class CasioF91W(object):
 
         match = self.R4.search(text) # hh:mm
         if match:
-            self.api.log('Alarm: #{0} from @{1}: {2} --> {3}', id, screen_name, repr(text), match.groups())
+            self.log.info('Alarm: #%d from @%s: %s --> %r', id, screen_name, repr(text), match.groups())
             th, tm = match.groups()
             th, tm = int(th), int(tm)
             return ((th, tm), tweet)
@@ -120,7 +115,7 @@ class CasioF91W(object):
                 status = u'@{0}'.format(screen_name)
                 while len(status) < 130:
                     status += u' BEEP BEEP!'
-                self.api.log('Posting status: {0} ({1})', repr(status), len(status))
+                self.log.info('Posting status: %s (%r)', repr(status), len(status))
                 self.api.post_statuses_update(status=status, in_reply_to_status_id=tid)
                 del self.api.config['alarms'][key][tid]
                 if not self.api.config['alarms'][key]:

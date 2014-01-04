@@ -1,9 +1,12 @@
+import logging
+
 import twitter
 
 class Luchtalarm(object):
     def __init__(self, name, api=None):
         self.name = name
-        self.api = api if api else twitter.TwitterAPI(name)
+        self.log = logging.getLogger(__name__)
+        self.api = api if api else twitter.TwitterAPI(name, self.log)
 
     def stuffing(self, month, year):
         year -= 2012
@@ -17,22 +20,16 @@ class Luchtalarm(object):
               + u'Hooooooooooooeeeeeeeeeeeeeeuuuuuuuuuuiiiiiiiiiii!'
               + self.stuffing(month, year))
 
+    @twitter.retry
     def tweede_paasdag_2013(self, t):
         status = "Vandaag als het goed is geen luchtalarm, vrolijk Pasen!"
-        try:
-            self.api.info('Posting status: {0} ({1})', repr(status), len(status))
-            self.api.post_statuses_update(status=status)
-            return True
-        except twitter.FailWhale as fail:
-            fail.log_error(self.api)
-            return False
-    
+        self.log.info('Posting status: %r (%d)', status, len(status))
+        self.api.post_statuses_update(status=status)
+        return True
+   
+    @twitter.retry 
     def sound_alarm(self, t):
         status = self.luchtalarm(t.tm_mon, t.tm_year)
-        try:
-            self.api.info('Posting status: {0} ({1})', repr(status), len(status))
-            self.api.post_statuses_update(status=status)
-            return True
-        except twitter.FailWhale as fail:
-            fail.log_error(self.api)
-            return False
+        self.log.info('Posting status: %s (%d)', status, len(status))
+        self.api.post_statuses_update(status=status)
+        return True

@@ -1,5 +1,4 @@
-#!/usr/bin/python2.7 -B
-
+import logging
 import re
 import sys
 import time
@@ -8,59 +7,38 @@ import traceback
 
 import twitter
 
-class CronExecutor(twitter.LoggingObject):
-    def __init__(self, pool_size=1):
+class CronExecutor(object):
+    def __init__(self):
         self.name = 'executor'
+        self.log = logging.getLogger(__name__)
         self.queue = Queue.Queue()
-        self.pool_size = pool_size
 
-    def start(self):
-        for i in range(self.pool_size):
-            threading.Thread(target=self.run, name="Executor-{0}".format(i)).start()
+    @twitter.task('PyCron-Executor-{0}')
+    def run(self, cancel):
+        while True:
+            action = self.queue.get()
+            self.log.debug("%s: %r", threading.current_thread().name, action)
+            if not action:
+                break
+            try:
+                (f, a, k) = action
+                f(*a, **k)
+            except Exception as e:
+                self.log.exception('Executor caught %s; skipping task', type(e).__name__)
 
-    def stop(self):
-        for i in range(self.pool_size):
-            self.queue.put(None)
-
-    def run(self):
-        try:
-            self.log("{0} starting, #{1}", threading.current_thread().name, twitter.gettid())
-            while True:
-                action = self.queue.get()
-                self.debug("{0}: {1}", threading.current_thread().name, action)
-                if not action:
-                    break
-                try:
-                    timeout = 1
-                    (f, a, k) = action
-                    while (timeout <= 8) and not f(*a, **k):
-                        time.sleep(timeout)
-                        timeout *= 2
-                except Exception as e:
-                    self.error("Exception on thread {0}:\n{1}",
-                        threading.current_thread().name,
-                        traceback.format_exc())
-        finally:
-            self.log("{0} exiting", threading.current_thread().name)
-
-    def put_queue(self, obj):
-        self.queue.put(obj)
-        
-
-class CronRunner(twitter.LoggingObject):
-    def __init__(self, name, executor, *rules):
+class CronRunner(object):
+    def __init__(self, name, get_time, queue, *rules):
         self.name = name
-        self.executor = executor
-        self.stopped = False
-        self.info('--------- --------- --------- --------- --------- --------- --------- ---------------- --------------------------------')
-        self.info('seconds   minutes   hours     monthday  month     year      weekday   bot              function                        ')
-        self.info('--------- --------- --------- --------- --------- --------- --------- ---------------- --------------------------------')
+        self.get_time = get_time
+        self.queue = queue
+        self.log = logging.getLogger(__name__)
+        self.log.info('--------- --------- --------- --------- --------- --------- --------- ---------------- --------------------------------')
+        self.log.info('seconds   minutes   hours     monthday  month     year      weekday   bot              function                        ')
+        self.log.info('--------- --------- --------- --------- --------- --------- --------- ---------------- --------------------------------')
         self.rules = [ self.parse_rule(*r) for r in rules ]
-        self.info('--------- --------- --------- --------- --------- --------- --------- ---------------- --------------------------------')
+        self.log.info('--------- --------- --------- --------- --------- --------- --------- ---------------- --------------------------------')
 
     def parse_rule(self, rule, action):
-        #r = re.compile(r'(\d\d)?(-(\d\d))?(/(\d\d))?')
-       
         FIRSTS   = '00-00/01 00-00/01 00-00/01 01-01/01 01-01/01 00-99/01 00-06/01'.split()
         DEFAULTS = '00-59/01 00-59/01 00-23/01 01-31/01 01-12/01 00-99/01 00-06/01'.split()
         MONTHS   = 'jan feb mar apr may jun jul aug sep oct nov dec'.split()
@@ -68,7 +46,7 @@ class CronRunner(twitter.LoggingObject):
 
         rule = rule.lower().split()
         name = action.im_self.name if hasattr(action, 'im_self') else ''
-        self.log('{0} {1:16} {2:32}', ' '.join('{0:9}'.format(r) for r in rule), name, action.__name__)
+        self.log.info('%s %-16s %-32s', ' '.join('{0:9}'.format(r) for r in rule), name, action.__name__)
 
         # replace * with 00-00/01 on the left side of the first non-*
         for (i, v) in enumerate(rule):          
@@ -118,27 +96,22 @@ class CronRunner(twitter.LoggingObject):
                     prev_owner = curr_owner
                     yield action
 
-    threadnum = 0
-    def start(self, get_time):
-        name = 'Cron-{0}'.format(CronRunner.threadnum) 
-        CronRunner.threadnum += 1
-        threading.Thread(name=name, target=self.run, args=[get_time]).start()
-
-    def stop(self):
-        self.stopped = True
-
-    def run(self, get_time):
+    @twitter.task('PyCron-Runner-{0}')
+    def run(self, cancel):
         try:
-            self.log("{0} starting, #{1}", threading.currentThread().getName(), twitter.gettid())
             prev = None
-            while not self.stopped:
-                time.sleep(0.5)
-                t = get_time()
+            while not cancel:
+                t = self.get_time()
                 if t.tm_sec == prev:
+                    time.sleep(0.2)
                     continue
                 prev = t.tm_sec
                 for action in self.get_runnable_actions(t):
-                    self.executor.put_queue((action, [t], {}))
+                    self.queue.put((action, [t], {}))
         finally:
-            self.log("{0} exiting", threading.currentThread().getName())
+            if threading.current_thread().name.endswith('-0'):
+                target_len = self.queue.qsize() + 10
+                while self.queue.qsize() < target_len:
+                    self.queue.put(None)
+                    time.sleep(0.2)
 

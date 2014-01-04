@@ -1,8 +1,7 @@
-__version__ = '0.1'
-__author__ = 'Joost Molenaar <j.j.molenaar@gmail.com>'
-
+import logging
 import time
-import urllib2, base64, json, threading, re
+import threading
+import re
 import random
 import Queue 
 
@@ -13,57 +12,47 @@ import twitter
 class UserStream(object):
     def __init__(self, name, api=None, userstream=None):
         self.name = name
-        self.api = api if api else twitter.TwitterAPI(name)
+        self.log = logging.getLogger(__name__)
+        self.api = api if api else twitter.TwitterAPI(name, self.log)
         self.userstream = userstream if userstream else twitter.UserStreamAPI(name)
-        self.running = False
 
-    def run(self):
-        self.api.info('{0} starting, #{1}', threading.current_thread().name, twitter.gettid())
-        try:
-            handlers = [
-                (self.dm_cmd_answer_query,   re.compile(r'^\?$').match),
-                (self.dm_cmd_add_term,       re.compile(r'^\+[a-z]+$').match),
-                (self.dm_cmd_del_term,       re.compile(r'^-[a-z]+$').match),
-                (self.dm_cmd_set_chance,     re.compile(r'(100|[1-9][0-9]?|)%').match),
-                (self.dm_cmd_send_help,      lambda t: True) ]
+    @twitter.task('GroteBroer1-UserStream-{0}')
+    def run(self, cancel):
+        handlers = [
+            (self.dm_cmd_answer_query,   re.compile(r'^\?$').match),
+            (self.dm_cmd_add_term,       re.compile(r'^\+[a-z]+$').match),
+            (self.dm_cmd_del_term,       re.compile(r'^-[a-z]+$').match),
+            (self.dm_cmd_set_chance,     re.compile(r'(100|[1-9][0-9]?|)%').match),
+            (self.dm_cmd_send_help,      lambda t: True) ]
 
-            for item in self.userstream.get_user():
-                if not self.running:
-                    break
-                if not item:
-                    continue
-                if 'direct_message' in item:
-                    m = item['direct_message']
-                    if m['sender']['screen_name'] not in self.api.config['admins']:
-                        self.dm_print(**m)
-                        continue
+        for item in self.userstream.get_user():
+            if cancel:
+                break
+            if not item:
+                continue
+            if 'direct_message' in item:
+                m = item['direct_message']
+                if m['sender']['screen_name'] not in self.api.config['admins']:
                     self.dm_print(**m)
-                    answer = next(handler 
-                                  for (handler, cond) in handlers 
-                                  if cond(m['text']))(**m)
-                    self.dm_send_answer(answer, **m)
-                    self.dm_delete(**m)
-        finally:
-            self.api.info('{0} exiting', threading.current_thread().name)
-
-    def start(self):
-        self.running = True
-        threading.Thread(target=self.run, name='GroteBroer1-UserStream').start()
-
-    def stop(self):
-        self.running = False
+                    continue
+                self.dm_print(**m)
+                answer = next(handler 
+                              for (handler, cond) in handlers 
+                              if cond(m['text']))(**m)
+                self.dm_send_answer(answer, **m)
+                self.dm_delete(**m)
 
     def dm_print(self, text, sender_screen_name, id, **_):
-        self.api.info('DM #{0} from {1}: {2} ({3})', id, sender_screen_name, repr(text), len(text))
+        self.log.info('DM #%s from @%s: %r (%d)', id, sender_screen_name, text, len(text))
 
     @twitter.retry
     def dm_send_answer(self, answer, sender_screen_name, id, **_):
-        self.api.info('DM #{0} to {1}: {2} ({3})', id, sender_screen_name, repr(answer), len(answer))
+        self.log.info('DM #%s to @%s: %r (%d)', id, sender_screen_name, answer, len(answer))
         self.api.post_direct_messages_new(screen_name=sender_screen_name, text=answer)
 
     @twitter.retry
     def dm_delete(self, id, **_):
-        self.api.info("DM #{0} delete", id)
+        self.log.info('DM #%s delete', id)
         self.api.post_direct_messages_destroy(id=id)
 
     def dm_cmd_answer_query(self, text, sender_screen_name, id, **_):
@@ -100,37 +89,33 @@ class UserStream(object):
 class Firehose(object):
     def __init__(self, name, api=None, stream=None, queue=None):
         self.name = name
-        self.api = api if api else twitter.TwitterAPI(name)
+        self.log = logging.getLogger(__name__)
+        self.api = api if api else twitter.TwitterAPI(name, self.log)
         self.stream = stream if stream else twitter.StreamAPI(name)
-        self.running = False
         self.queue = queue if queue else Queue.Queue()
         self.stat_tweets = 0
 
-    def run(self):
+    @twitter.task('GroteBroer1-Firehose-{0}')
+    def run(self, cancel):
         try:
-            self.api.info('{0} starting, #{1}', threading.current_thread().name, twitter.gettid())
             for tweet in self.stream.get_statuses_filter(locations='3.27,51.35,7.25,53.6'):
-                if not self.running:
+                if cancel:
                     break
                 if not tweet:
                     continue
                 self.queue.put(tweet)
                 self.stat_tweets += 1
         finally:
-            self.api.info('{0} exiting', threading.current_thread().name)
-
-    def start(self):
-        self.running = True
-        threading.Thread(name='GroteBroer1-Firehose', target=self.run).start()
-
-    def stop(self):
-        self.api.info('Firehose stopping')
-        self.running = False
+            target_len = self.queue.qsize() + 10
+            while self.queue.qsize() < target_len:
+                self.queue.put(None)
+                time.sleep(0.2)
 
 class Inspector(object):
     def __init__(self, name, api=None, queue=None):
         self.name = name
-        self.api = api if api else twitter.TwitterAPI(name)
+        self.log = logging.getLogger(__name__)
+        self.api = api if api else twitter.TwitterAPI(name, self.log)
         self.queue = queue if queue else Queue.Queue()
         self.term_regex = None
         self.stat_matched = 0
@@ -138,49 +123,36 @@ class Inspector(object):
         self.stat_handled = 0
         self.stat_handled_lock = threading.Lock()
 
-    def run(self):
-        try:
-            self.api.info('{0} starting, #{1}', threading.current_thread().name, twitter.gettid())
-            while True:
-                tweet = self.queue.get()
-                if tweet is None:
-                    break
-                if not self.term_regex:
-                    continue
-                if self.search(tweet):
-                    with self.stat_matched_lock:
-                        self.stat_matched += 1
-                    if self.handle_suspect(tweet):
-                        with self.stat_handled_lock:
-                            self.stat_handled += 1
-        finally:
-            self.api.info('{0} exiting', threading.current_thread().name)
-
-    def start(self, count=1):
-        self.thread_count = count
-        for i in range(count):
-            threading.Thread(name='GroteBroer1-Inspector-{0}'.format(i), target=self.run).start()
-
-    def stop(self):
-        self.api.info('Inspectors stopping')
-        for i in range(self.thread_count):
-            self.queue.put(None)
+    @twitter.task('GroteBroer1-Inspector-{0}')
+    def run(self, cancel):
+        while True:
+            tweet = self.queue.get()
+            if tweet is None:
+                break
+            if not self.term_regex:
+                continue
+            if self.search(tweet):
+                with self.stat_matched_lock:
+                    self.stat_matched += 1
+                if self.handle_suspect(tweet):
+                    with self.stat_handled_lock:
+                        self.stat_handled += 1
 
     def search(self, tweet):
         text = unidecode.unidecode(tweet['text']).lower()
         if self.terms.search(text):
-            self.api.info('Firehose match: #{0} from {1}: {2!r}', tweet['id'], tweet['user']['screen_name'], tweet['text'])
+            self.log.info('Match: #%s from @%s: %r', tweet['id'], tweet['user']['screen_name'], tweet['text'])
             return True
         return False
   
     @twitter.retry 
     def retweet(self, tweet):
-        self.api.info('Firehose retweeting #{0} from @{1}', tweet['id'], tweet['user']['screen_name'])
+        self.log.info('Retweeting #%s from @%s', tweet['id'], tweet['user']['screen_name'])
         self.api.post_statuses_retweet(tweet['id'])
 
     @twitter.retry
     def follow(self, tweet):
-        self.api.info('Following user @{0}', tweet['user']['screen_name'])
+        self.log.info('Following user @%s', tweet['user']['screen_name'])
         self.api.post_friendships_create(screen_name=tweet['user']['screen_name'])
  
     def handle_suspect(self, tweet, randint=random.randint):
@@ -194,7 +166,8 @@ class GroteBroer1(object):
     STATS_FILENAME = 'grotebroer1-stats.log'
     def __init__(self, name, api=None):
         self.name = name
-        self.api = api if api else twitter.TwitterAPI(name)
+        self.log = logging.getLogger(__name__)
+        self.api = api if api else twitter.TwitterAPI(name, self.log)
         self.firehose = Firehose(name, api=self.api, queue=Queue.Queue())
         self.inspector = Inspector(name, api=self.api, queue=self.firehose.queue)
         self.userstream = UserStream(name, api=self.api)
@@ -205,7 +178,7 @@ class GroteBroer1(object):
     def update_regex(self, t):
         term_regex = r'\b(?:' + '|'.join(self.api.config['terms']) + r')\b'
         if self.inspector.term_regex != term_regex:
-            self.api.info('Firehose new regex: {0!r}', term_regex)
+            self.log.info('Firehose new regex: %r', term_regex)
             self.inspector.terms = re.compile(term_regex)
             self.inspector.term_regex = term_regex
         return True

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import time
-#from threading import Thread
 import threading
+import logging
 
 import twitter
 import pycron
@@ -26,7 +26,7 @@ def parse_args():
    
 class RobotZooCET(pycron.CronRunner):
     def __init__(self, name, executor):
-        super(RobotZooCET, self).__init__(name, executor,
+        super(RobotZooCET, self).__init__(name, time.localtime, executor,
             #   -------- -------- -------- -------- -------- -------- --------
             #   second   minute   hour     monthday month    year     weekday
             #   -------- -------- -------- -------- -------- -------- --------
@@ -134,7 +134,7 @@ class RobotZooCET(pycron.CronRunner):
 
 class RobotZooUTC(pycron.CronRunner):
     def __init__(self, name, executor):
-        super(RobotZooUTC, self).__init__(name, executor,
+        super(RobotZooUTC, self).__init__(name, time.gmtime, executor,
             #   -------- -------- -------- -------- -------- --------- --------
             #   second   minute   hour     monthday month    year      weekday
             #   -------- -------- -------- -------- -------- --------- --------
@@ -155,27 +155,36 @@ class RobotZooUTC(pycron.CronRunner):
         )
 
 
-casio_f91w = _casio_f91w.CasioF91W('casio_f91w')
-deoldehove = _deoldehove.DeOldehove('deoldehove')
-msvlieland = _msvlieland.MsVlieland('msvlieland')
-hetluchtalarm = _hetluchtalarm.Luchtalarm('hetluchtalarm')
-convertbot = _convertbot.ConvertBot('convertbot')
-grotebroer1 = _grotebroer1.GroteBroer1('grotebroer1')
-y2k38warning = _y2k38warning.Y2K38Warning('y2k38warning')
-maanfase = _maanfase.Maanfase('maanfase')
-geotweets = _geotweets.GeoTweets('johndoeveloper')
-
 if __name__ == '__main__':
 
     args = parse_args()
 
+    logging.basicConfig(level=(logging.DEBUG if args.debug else
+                               logging.ERROR if args.quiet else logging.INFO),
+                        format='%(asctime)s %(name)s - %(threadName)s - %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S')
+
+    if not args.debug:
+        logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.ERROR)
+
     if args.quiet: twitter.LoggingObject.LEVEL = twitter.LoggingObject.LEVEL_ERROR 
     if args.debug: twitter.LoggingObject.LEVEL = twitter.LoggingObject.LEVEL_DEBUG
 
-    executor = pycron.CronExecutor(pool_size=4)
+    logging.info('Robot zoo starting')
 
-    cron_cet = RobotZooCET('cron_cet', executor)
-    cron_utc = RobotZooUTC('cron_utc', executor)
+    casio_f91w = _casio_f91w.CasioF91W('casio_f91w')
+    deoldehove = _deoldehove.DeOldehove('deoldehove')
+    msvlieland = _msvlieland.MsVlieland('msvlieland')
+    hetluchtalarm = _hetluchtalarm.Luchtalarm('hetluchtalarm')
+    convertbot = _convertbot.ConvertBot('convertbot')
+    grotebroer1 = _grotebroer1.GroteBroer1('grotebroer1')
+    y2k38warning = _y2k38warning.Y2K38Warning('y2k38warning')
+    maanfase = _maanfase.Maanfase('maanfase')
+    geotweets = _geotweets.GeoTweets('johndoeveloper')
+
+    executor = pycron.CronExecutor()
+    cron_cet = RobotZooCET('cron_cet', executor.queue)
+    cron_utc = RobotZooUTC('cron_utc', executor.queue)
 
     casio_f91w.api.check()
     deoldehove.api.check()
@@ -187,33 +196,19 @@ if __name__ == '__main__':
     maanfase.api.check()
     geotweets.api.check()
 
+    cancel = [ cron_cet.run(),
+               cron_utc.run(),
+               executor.run(count=4),
+               grotebroer1.userstream.run(),
+               grotebroer1.firehose.run(),
+               grotebroer1.inspector.run(),
+               geotweets.firehose(),
+               geotweets.process() ]
     try:
-        cron_cet.start(time.localtime)
-        cron_utc.start(time.gmtime)
-
-        grotebroer1.userstream.start()
-        grotebroer1.firehose.start()
-        grotebroer1.inspector.start(count=1)
-
-        cancel = [ geotweets.firehose(),
-                   geotweets.process() ]
-
-        executor.start()
-
-        time.sleep(30)
-        for thread in threading.enumerate():
-            print thread, thread.name
-
         while True: 
             time.sleep(1)
     except KeyboardInterrupt:
         print
-        executor.log('Main thread got keyboard interrupt')
+        logging.info('Main thread got keyboard interrupt')
     finally:
-        executor.stop()
-        cron_cet.stop()
-        cron_utc.stop()
-        grotebroer1.userstream.stop()
-        grotebroer1.firehose.stop()
-        grotebroer1.inspector.stop()
         map(lambda cancel: cancel(), cancel)

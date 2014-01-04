@@ -1,8 +1,6 @@
-#!/usr/bin/python
-
-__author__ = 'Joost Molenaar <j.j.molenaar@gmail.com>'
 
 from datetime import datetime
+import logging
 
 import ephem
 import pytz
@@ -61,12 +59,14 @@ class MoonModel(object):
 class Maanfase(object):
     def __init__(self, name, api=None):
         self.name = name
-        self.api = api if api else twitter.TwitterAPI(name)
+        self.log = logging.getLogger(__name__)
+        self.api = api if api else twitter.TwitterAPI(name, self.log)
         self.moon = MoonModel()
 
+    @twitter.retry
     def post_phase(self, t):
         if self.moon.year != t.tm_year:
-            self.api.log("Initializing for year {0}", t.tm_year)
+            self.log.info("Initializing for year %d", t.tm_year)
             self.moon.year = t.tm_year
 
         result = self.moon[t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min]
@@ -76,11 +76,7 @@ class Maanfase(object):
         h, m, s, phase = result
         status = u"Om {0:02}:{1:02}:{2:02} is het {3}.".format(h, m, s, PHASE_NAME[phase])
 
-        try:
-            self.api.log("Posting status: {0} ({1})", repr(status), len(status))
-            self.api.post_statuses_update(status=status)
-            return True
-        except twitter.FailWhale as fail:
-            fail.log_error(self.api)
-            return False
+        self.log.info("Posting status: %r (%d)", status, len(status))
+        self.api.post_statuses_update(status=status)
+        return True
 

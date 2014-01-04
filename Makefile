@@ -25,7 +25,7 @@ env:
 	virtualenv env $(QUIET)
 
 env/.requirements: env requirements.txt
-	env/bin/pip install -r requirements.txt -U $(QUIET)
+	env/bin/pip install -r requirements.txt -U $(QUIET) --download-cache .cache
 	touch env/.requirements
 
 clean:

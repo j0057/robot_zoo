@@ -8,38 +8,33 @@ import time
 import sys
 import threading
 import urllib2, base64, json, threading, Queue
+import functools
+import logging
 
 import requests 
 
 import oauth1
-
-# LoggingObject
-#     |
-#     |        Configuration
-#     \           |
-#      \         /
-#       \       /
-#       TwitterAPI
 
 class FailWhale(Exception):
     def log_error(self, obj):
         obj.error('FAIL WHALE: {0}', str(self))
 
 def retry(f):
+    @functools.wraps(f)
     def retry(self, *a, **k):
         t = 1
         i = 1
         while t < 32:
             try:
                 if i > 1:
-                    self.api.log('Attempt {0}, t={1}', i, t)
-                return f(self, *a, **k)
-            except FailWhale as fail:
-                fail.log_error(self.api)
+                    self.log.info('Attempt %d, t=%d', i, t)
+                f(self, *a, **k)
+                break
+            except FailWhale as e:
+                self.log.info("Retry caught %s - %r", type(e).__name__, e)
                 time.sleep(t)
                 t *= 2
                 i += 1
-        return False
     return retry
 
 class Cancellation(object):
@@ -51,11 +46,20 @@ class Cancellation(object):
 
 def task(name):
     def task(f):
-        def task(self):
+        @functools.wraps(f)
+        def task(self, count=1):
+            def run():
+                try:
+                    logging.getLogger(__name__).info('Starting, #%d', gettid())
+                    f(self, cancel)
+                finally:
+                    logging.getLogger(__name__).info('Exiting')
             cancel = Cancellation()
-            thread = threading.Thread(name=name.format(task.i), target=f, args=[self, cancel])
-            thread.start()
-            task.i += 1
+            for _ in range(count):
+                #thread = threading.Thread(name=name.format(task.i), target=f, args=[self, cancel])
+                thread = threading.Thread(name=name.format(task.i), target=run)
+                thread.start()
+                task.i += 1
             return cancel.cancel
         task.i = 0
         return task
@@ -64,6 +68,7 @@ def task(name):
 def gettid():
     return ctypes.CDLL('libc.so.6').syscall(186)
 
+"""
 class LoggingObject(object):
     LEVEL_DEBUG = 2
     LEVEL_INFO = 1
@@ -113,6 +118,7 @@ class LoggingObject(object):
         self.__log(LoggingObject.LEVEL_DEBUG, message, *args)
 
     log = info
+"""
 
 class Configuration(object):
     def __init__(self, config_file=None):
@@ -122,17 +128,17 @@ class Configuration(object):
 
     def load(self):
         if self.config_file:
-            self.log('Loading {0}', self.config_file)
+            self.log.info('Loading %s', self.config_file)
             with open(self.config_file, 'rb') as f:
                 self.config = json.load(f)
 
     def save(self):
         if self.config_file:
-            self.log('Saving {0}', self.config_file)
+            self.log.info('Saving %s', self.config_file)
             with open(self.config_file, 'wb') as f:
                 json.dump(self.config, f, indent=4)
 
-class TwitterAPI(Configuration, LoggingObject):
+class TwitterAPI(Configuration):
     API_VERSION = '1.1'
     API_HOST = 'api.twitter.com'
     API_STREAM = False
@@ -140,8 +146,9 @@ class TwitterAPI(Configuration, LoggingObject):
     API_REGEX = r'^(get|post|put|delete)_(statuses|search|direct_messages|followers|friendships|friends|users|favorites|lists|account|saved_searches|trends|geo|blocks|notifications)(.*)'
     API_REGEX = re.compile(API_REGEX)
 
-    def __init__(self, name):
+    def __init__(self, name, log=None):
         self.name = '@{0}'.format(name)
+        self.log = log if log else logging.getLogger(__name__)
         config_file = 'cfg/{0}.json'.format(name)
         super(TwitterAPI, self).__init__(config_file)
 
@@ -164,8 +171,9 @@ class TwitterAPI(Configuration, LoggingObject):
                     + '/'
                     + '/'.join(item for item in ([self.API_VERSION] + [path, obj] + args) if item)
                     + '.json')
+                content = None
                 try:
-                    self.debug('--> {0}: {1}', name, url)
+                    self.log.debug('--> %s: %s', name, url)
                     client = oauth1.Oauth1(config=self.config['oauth'], stream=self.API_STREAM)
                     client.log_request = self.log_request
                     client.log_response = self.log_response
@@ -173,9 +181,8 @@ class TwitterAPI(Configuration, LoggingObject):
                         response = client.request(method, url, post=kwargs, headers={'Accept': 'application/json'})
                     else:
                         response = client.request(method, url, get=kwargs, headers={'Accept': 'application/json'})
-                    self.debug('<-- {0}: {1}', name, response.status_code)
+                    self.log.debug('<-- %s: %s', name, response.status_code)
 
-                    content = None
                     if self.API_STREAM:
                         content = (self.try_json_decode(message) for message in response.iter_lines(chunk_size=1))
                     else:
@@ -196,28 +203,23 @@ class TwitterAPI(Configuration, LoggingObject):
             return s
 
     def log_request(self, request):
-        msg = '\n'
-        msg += '\n< {0} {1}'.format(request.method, request.url)
-        for k in sorted(request.headers.keys()):
-            msg += '\n< {0}: {1}'.format(k.capitalize(), request.headers[k])
-        self.debug(msg)
+        with logging.root.handlers[0].lock:
+            self.log.debug('< %s %s', request.method, request.url)
+            for k in sorted(request.headers.keys()):
+                self.log.debug('< %s %s', k.capitalize(), request.headers[k])
 
     def log_response(self, response):
         msg = '\n'
         msg += '\n> {0}'.format(response.status_code)
         for k in sorted(response.headers.keys()):
             msg += '\n> {0}: {1}'.format(k.capitalize(), response.headers[k])
-        self.debug(msg)
+        self.log.debug(msg)
 
     def check(self):
-        self.info('Checking account')
+        self.log.info('Checking account: %s', self.name)
         result = self.get_account_verify_credentials()
         name = '@' + result['screen_name'].lower()
-        #assert self.name == name, 'Name according to self is "{0}", but "{1}" according to twitter'.format(self.name, name)
-        if self.name != name:
-            self.error('Name according to self is {0!r}, but {1!r} according to twitter',
-                name, self.name)
-        return True
+        assert self.name == name, 'Name according to self is "{0}", but "{1}" according to twitter'.format(self.name, name)
 
 class StreamAPI(TwitterAPI):
     API_HOST = 'stream.twitter.com'
@@ -229,5 +231,4 @@ class StreamAPI(TwitterAPI):
 class UserStreamAPI(StreamAPI):
     API_HOST = 'userstream.twitter.com'
 
-# TwitterAPI('grotebroer1').create_oauth.client().request('https://stream.twitter.com/1.1/statuses/filter.json?locations=3.27,51.35,7.25,53.6', method='GET', headers={'Accept': 'application/json'})
 
