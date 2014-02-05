@@ -53,62 +53,7 @@ class RobotZooCET(pycron.CronRunner):
             , ('*        00-59/30 *        *        *        *        *       ', deoldehove.sound_clock)
 
             #   ........ ........ ........ ........ ........ ........ ........  @msvlieland
-            , ('*        15       10       04-16    feb      2012     *       ', msvlieland.sound_horn) # ijs op waddenzee 2012 
-            , ('*        30       15       04-16    feb      2012     *       ', msvlieland.sound_horn)
-
-            , ('*        00       09       17       feb      2012     *       ', msvlieland.sound_horn)
-            , ('*        00       17       17       feb      2012     *       ', msvlieland.sound_horn)
-
-            , ('*        00       09       04-17    feb      2012     *       ', msvlieland._)
-            , ('*        15       14       04-17    feb      2012     *       ', msvlieland._)
-            , ('*        00       19       04-17    feb      2012     *       ', msvlieland._)
-
-            , ('*        00       09       *        apr-sep  2012     *       ', msvlieland.sound_horn) # zomerdienstregeling 2012
-            , ('*        15       14       *        apr-sep  2012     *       ', msvlieland.sound_horn)
-            , ('*        00       19       *        apr-sep  2012     *       ', msvlieland.sound_horn)
-
-            , ('*        00       09       25       dec      2012     *       ', msvlieland._) # winterdienstregeling 2012
-            , ('*        00       09       *        oct-dec  2012     sun     ', msvlieland._)
-            , ('*        00       09       *        oct-dec  2012     *       ', msvlieland.sound_horn)
-            
-            , ('*        00       09       01       04       2013     mon     ', msvlieland._) # dienstregeling 2013: 9:00
-            , ('*        00       09       *        *        2013     mon     ', msvlieland.sound_horn)
-            , ('*        00       09       01       01       2013     tue     ', msvlieland._)
-            , ('*        00       09       *        *        2013     tue     ', msvlieland.sound_horn)
-            , ('*        00       09       25       12       2013     wed     ', msvlieland._)
-            , ('*        00       09       *        *        2013     wed     ', msvlieland.sound_horn)
-            , ('*        00       09       *        *        2013     thu     ', msvlieland.sound_horn)
-            , ('*        00       09       *        *        2013     fri     ', msvlieland.sound_horn)
-            , ('*        00       09       *        *        2013     sat     ', msvlieland.sound_horn)
-            , ('*        00       09       *        01-03    2013     sun     ', msvlieland._)
-            , ('*        00       09       01-19    04       2013     sun     ', msvlieland._)
-            , ('*        00       09       *        10-12    2013     sun     ', msvlieland._)
-            , ('*        00       09       *        *        2013     sun     ', msvlieland.sound_horn)
-
-            , ('*        15       14       *        *        2013     *       ', msvlieland.sound_horn) # dienstregeling 2013: 14:15
-
-            , ('*        00       19       *        01-03    2013     mon     ', msvlieland._) # dienstregeling 2013: 19:00
-            , ('*        00       19       02-19    04       2013     mon     ', msvlieland._)
-            , ('*        00       19       *        10-12    2013     mon     ', msvlieland._)
-            , ('*        00       19       *        *        2013     mon     ', msvlieland.sound_horn)
-            , ('*        00       19       24       12       2013     tue     ', msvlieland._)
-            , ('*        00       19       31       12       2013     tue     ', msvlieland._)
-            , ('*        00       19       *        *        2013     tue     ', msvlieland.sound_horn)
-            , ('*        00       19       *        01-03    2013     wed     ', msvlieland._)
-            , ('*        00       19       01-19    04       2013     wed     ', msvlieland._)
-            , ('*        00       19       *        10-12    2013     wed     ', msvlieland._)
-            , ('*        00       19       *        *        2013     wed     ', msvlieland.sound_horn)
-            , ('*        00       19       28       03       2013     thu     ', msvlieland._)
-            , ('*        00       19       *        01-03    2013     thu     ', msvlieland._)
-            , ('*        00       19       01-19    04       2013     thu     ', msvlieland._)
-            , ('*        00       19       *        10-12    2013     thu     ', msvlieland._)
-            , ('*        00       19       *        *        2013     thu     ', msvlieland.sound_horn)
-            , ('*        00       19       *        *        2013     fri     ', msvlieland.sound_horn)
-            , ('*        00       19       *        01-03    2013     sat     ', msvlieland._)
-            , ('*        00       19       01-19    04       2013     sat     ', msvlieland._)
-            , ('*        00       19       *        10-12    2013     sat     ', msvlieland._)
-            , ('*        00       19       *        *        2013     sat     ', msvlieland.sound_horn)
-            , ('*        00       19       *        *        2013     sun     ', msvlieland.sound_horn)
+            , ('00       *        *        *        *        *        *       ', msvlieland.sound_horn_dynamic)
 
             #   ........ ........ ........ ........ ........ ........ ........  @convertbot
             , ('00       *        *        *        *        *        *       ', convertbot.post_time)
