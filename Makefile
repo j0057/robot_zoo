@@ -26,7 +26,7 @@ env: $(PKG)-ok
 	virtualenv env $(QUIET)
 	env/bin/pip install --no-index --find-links=$(PKG) --use-wheel --upgrade pip setuptools wheel $(QUIET)
 
-env/.pkg-src: requirements.txt env
+env/.pkg-src: requirements.txt | env
 	env/bin/pip install --no-use-wheel --download $(PKG) -r requirements.txt $(QUIET)
 	@touch env/.pkg-src
 
@@ -34,7 +34,7 @@ env/.pkg-whl: requirements.txt env/.pkg-src
 	env/bin/pip wheel --no-index --find-links=$(PKG) --use-wheel --wheel-dir=$(PKG) -r requirements.txt $(QUIET)
 	@touch env/.pkg-whl
 
-env/.requirements: requirements.txt env
+env/.requirements: requirements.txt | env
 	env/bin/pip install --no-index --find-links=$(PKG) --use-wheel --upgrade -r requirements.txt $(QUIET)
 	@touch env/.requirements
 
