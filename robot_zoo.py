@@ -53,6 +53,7 @@ class RobotZooCET(pycron.CronRunner):
             , ('*        00-59/30 *        *        *        *        *       ', deoldehove.sound_clock)
 
             #   ........ ........ ........ ........ ........ ........ ........  @msvlieland
+            , ('00       00       00       *        *        *        *       ', msvlieland.update_departures)
             , ('00       *        *        *        *        *        *       ', msvlieland.sound_horn_dynamic)
 
             #   ........ ........ ........ ........ ........ ........ ........  @convertbot

@@ -23,6 +23,7 @@ class MsVlielandData(object):
             self.prefetch_week(*value)
             self.delete_old(*value)
             self._date = value
+            self.log.info('Current departures: %s', self.departures)
 
     def get_data(self, y, m, d):
         self.log.info('Getting departures for %s', (y, m, d))
@@ -71,12 +72,15 @@ class MsVlieland(object):
         self.data = MsVlielandData(log=self.log)
 
     @twitter.retry
+    def update_departures(self, t):
+        self.data.date = (t.tm_year, t.tm_mon, t.tm_mday)
+
+    @twitter.retry
     def sound_horn_dynamic(self, t):
         date = (t.tm_year, t.tm_mon, t.tm_mday)
         time = (t.tm_hour, t.tm_min)
 
-        self.data.date = date
-
+        if not self.data.date: self.update_departures(t)
         if date not in self.data.departures: return True
         if time not in self.data.departures[date]: return True
 
