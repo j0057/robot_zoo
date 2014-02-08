@@ -30,9 +30,11 @@ class MsVlielandData(object):
             self.prefetch_week(*value)
             self.delete_old(*value)
             self._date = value
-            self.log.info('Current departures:')
-            for line in pprint.pformat(self.departures).split('\n'):
-                self.log.info(line)
+            self.log_departures()
+
+    def log_departures(self):
+        for line in pprint.pformat(self.departures).split('\n'):
+            self.log.info(line)
 
     def get_data(self, y, m, d):
         self.log.info('Getting departures for %s', (y, m, d))
@@ -87,6 +89,7 @@ class MsVlieland(object):
     @twitter.retry
     def update_departures_for_today(self, t):
         self.data.update_today(t.tm_year, t.tm_mon, t.tm_mday)
+        self.data.log_departures()
 
     @twitter.retry
     def sound_horn_dynamic(self, t):
