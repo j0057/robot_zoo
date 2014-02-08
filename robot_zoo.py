@@ -54,6 +54,7 @@ class RobotZooCET(pycron.CronRunner):
 
             #   ........ ........ ........ ........ ........ ........ ........  @msvlieland
             , ('00       00       00       *        *        *        *       ', msvlieland.update_departures)
+            , ('00       59       08       *        *        *        *       ', msvlieland.update_departures_for_today)
             , ('00       *        *        *        *        *        *       ', msvlieland.sound_horn_dynamic)
 
             #   ........ ........ ........ ........ ........ ........ ........  @convertbot

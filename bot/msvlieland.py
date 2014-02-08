@@ -1,9 +1,16 @@
 import datetime
 import logging
+import pprint
 
 import requests
 
 import twitter
+
+# When starting the service, prefetch departures for 7 days.
+# Every day at 00:00, update for that day and get any missing departures for the next 7 days --
+# should normally only fetch one day (7 days into the future).
+# If the API returns an error for some reason, retry after 2 seconds, then 4, then 8, then 16.
+# If it still fails then, leave it -- the data should already have been prefetched.
 
 class MsVlielandData(object):
     def __init__(self, log=None):
@@ -23,7 +30,9 @@ class MsVlielandData(object):
             self.prefetch_week(*value)
             self.delete_old(*value)
             self._date = value
-            self.log.info('Current departures: %s', self.departures)
+            self.log.info('Current departures:')
+            for line in pprint.pformat(self.departures).split('\n'):
+                self.log.info(line)
 
     def get_data(self, y, m, d):
         self.log.info('Getting departures for %s', (y, m, d))
@@ -39,9 +48,9 @@ class MsVlielandData(object):
                 'User-Agent': requests.utils.default_user_agent() + ' (robot_zoo.py; j.j.molenaar@gmail.com namens https://twitter.com/msvlieland)' })
         response.raise_for_status()
         json = response.json()
-        times = [ tuple(map(int, departure['departure_time'].split(' ')[1].split(':')[0:2]))
-                  for departure in json['outwards'] 
-                  if departure['other'] == 'Veerdienst' ]
+        times = sorted(tuple(map(int, departure['departure_time'].split(' ')[1].split(':')[0:2]))
+                       for departure in json['outwards'] 
+                       if departure['other'] == 'Veerdienst')
         return ((y,m,d), times)
 
     def delete_old(self, y, m, d):
@@ -76,6 +85,10 @@ class MsVlieland(object):
         self.data.date = (t.tm_year, t.tm_mon, t.tm_mday)
 
     @twitter.retry
+    def update_departures_for_today(self, t):
+        self.data.update_today(t.tm_year, t.tm_mon, t.tm_mday)
+
+    @twitter.retry
     def sound_horn_dynamic(self, t):
         date = (t.tm_year, t.tm_mon, t.tm_mday)
         time = (t.tm_hour, t.tm_min)
@@ -86,14 +99,13 @@ class MsVlieland(object):
 
         status = u'TOET TOET TOET' + (u'\u2002' * self.prevent_dupe)
         self.prevent_dupe = (self.prevent_dupe + 1) % 3
-        self.log.info("Posting status: {0} ({1})", repr(status), len(status))
+        self.log.info("Posting status: %r (%s)", status, len(status))
         self.api.post_statuses_update(status=status)
         return True
 
 if __name__ == '__main__':
-    from pprint import pprint
     d = MsVlielandData()
     d.date = (2014, 2, 5)
-    pprint(d.departures)
+    pprint.pprint(d.departures)
     d.date = (2014, 2, 6)
-    pprint(d.departures)
+    pprint.pprint(d.departures)
