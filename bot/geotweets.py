@@ -26,24 +26,13 @@ class GeoTweets(object):
         self.create_raw()
         self.load_raw()
         
-    @twitter.task(name='GeoTweets-Firehose-{0}')
-    def firehose(self, cancel):
-        try:
-            for tweet in self.stream.get_statuses_filter(locations='3.23,50.75,7.23,53.75'):
-                if cancel: break
-                if not tweet: continue
-                if not tweet['geo']: continue
-                (lat, lng) = tweet['geo']['coordinates']
-                self.queue.put((lat,lng))
-        finally:
-            self.queue.put(None)
-
     @twitter.task(name='GeoTweets-Processor-{0}')
     def process(self, _):
         while True:
-            coord = self.queue.get()
-            if not coord: break
-            (lat, lng) = coord
+            tweet = self.queue.get()
+            if not tweet: break
+            if not tweet['geo']: continue
+            (lat, lng) = tweet['geo']['coordinates']
             x = int((lng- 3.23) * 256)
             y = int((lat-50.75) * 256)
             if not (0 <= x < 1024): continue

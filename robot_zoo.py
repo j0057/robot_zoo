@@ -16,6 +16,7 @@ from bot import grotebroer1 as _grotebroer1
 from bot import y2k38warning as _y2k38warning
 from bot import maanfase as _maanfase
 from bot import geotweets as _geotweets
+from bot import johndoeveloper as _johndoeveloper
 
 def parse_args():
     import argparse
@@ -69,8 +70,6 @@ class RobotZooCET(pycron.CronRunner):
 
             #   ........ ........ ........ ........ ........ ........ ........  @grotebroer1
             , ('01-59/15 *        *        *        *        *        *       ', grotebroer1.update_regex)
-            , ('00       *        *        *        *        *        *       ', grotebroer1.log_stats)
-            , ('02       00       00       00       *        *        *       ', grotebroer1.truncate_stats)
 
             #   ........ ........ ........ ........ ........ ........ ........  geotweets
             , ('05       *        *        *        *        *        *       ', geotweets.save_raw)
@@ -128,6 +127,7 @@ if __name__ == '__main__':
     y2k38warning = _y2k38warning.Y2K38Warning('y2k38warning')
     maanfase = _maanfase.Maanfase('maanfase')
     geotweets = _geotweets.GeoTweets('johndoeveloper')
+    firehose = _johndoeveloper.Firehose('johndoeveloper', '3.23,50.75,7.23,53.75')
 
     executor = pycron.CronExecutor()
     cron_cet = RobotZooCET('cron_cet', executor.queue)
@@ -142,15 +142,18 @@ if __name__ == '__main__':
     y2k38warning.api.check()
     maanfase.api.check()
     geotweets.api.check()
+    firehose.api.check()
+
+    firehose.add_listener(grotebroer1.inspector)
+    firehose.add_listener(geotweets)
 
     cancel = [ cron_cet.run(),
                cron_utc.run(),
                executor.run(count=4),
                grotebroer1.userstream.run(),
-               grotebroer1.firehose.run(),
                grotebroer1.inspector.run(),
-               geotweets.firehose(),
-               geotweets.process() ]
+               geotweets.process(),
+               firehose.run() ]
     try:
         while True: 
             time.sleep(1)
@@ -159,3 +162,4 @@ if __name__ == '__main__':
         logging.info('Main thread got keyboard interrupt')
     finally:
         map(lambda cancel: cancel(), cancel)
+

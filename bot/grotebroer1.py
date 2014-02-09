@@ -86,31 +86,6 @@ class UserStream(object):
     def dm_cmd_send_help(self, text, sender_screen_name, id, **_):
         return u"Usage: +term | -term | ?"
 
-class Firehose(object):
-    def __init__(self, name, api=None, stream=None, queue=None):
-        self.name = name
-        self.log = logging.getLogger(__name__)
-        self.api = api if api else twitter.TwitterAPI(name, self.log)
-        self.stream = stream if stream else twitter.StreamAPI(name)
-        self.queue = queue if queue else Queue.Queue()
-        self.stat_tweets = 0
-
-    @twitter.task('GroteBroer1-Firehose-{0}')
-    def run(self, cancel):
-        try:
-            for tweet in self.stream.get_statuses_filter(locations='3.27,51.35,7.25,53.6'):
-                if cancel:
-                    break
-                if not tweet:
-                    continue
-                self.queue.put(tweet)
-                self.stat_tweets += 1
-        finally:
-            target_len = self.queue.qsize() + 10
-            while self.queue.qsize() < target_len:
-                self.queue.put(None)
-                time.sleep(0.2)
-
 class Inspector(object):
     def __init__(self, name, api=None, queue=None):
         self.name = name
@@ -159,8 +134,7 @@ class GroteBroer1(object):
         self.name = name
         self.log = logging.getLogger(__name__)
         self.api = api if api else twitter.TwitterAPI(name, self.log)
-        self.firehose = Firehose(name, api=self.api, queue=Queue.Queue())
-        self.inspector = Inspector(name, api=self.api, queue=self.firehose.queue)
+        self.inspector = Inspector(name, api=self.api, queue=Queue.Queue())
         self.userstream = UserStream(name, api=self.api)
 
     def update_regex(self, t):
