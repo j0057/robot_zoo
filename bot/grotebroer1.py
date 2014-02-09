@@ -118,10 +118,6 @@ class Inspector(object):
         self.api = api if api else twitter.TwitterAPI(name, self.log)
         self.queue = queue if queue else Queue.Queue()
         self.term_regex = None
-        self.stat_matched = 0
-        self.stat_matched_lock = threading.Lock()
-        self.stat_handled = 0
-        self.stat_handled_lock = threading.Lock()
 
     @twitter.task('GroteBroer1-Inspector-{0}')
     def run(self, cancel):
@@ -132,11 +128,7 @@ class Inspector(object):
             if not self.term_regex:
                 continue
             if self.search(tweet):
-                with self.stat_matched_lock:
-                    self.stat_matched += 1
-                if self.handle_suspect(tweet):
-                    with self.stat_handled_lock:
-                        self.stat_handled += 1
+                self.handle_suspect(tweet)
 
     def search(self, tweet):
         text = unidecode.unidecode(tweet['text']).lower()
@@ -163,7 +155,6 @@ class Inspector(object):
         return False
 
 class GroteBroer1(object):
-    STATS_FILENAME = 'grotebroer1-stats.log'
     def __init__(self, name, api=None):
         self.name = name
         self.log = logging.getLogger(__name__)
@@ -171,9 +162,6 @@ class GroteBroer1(object):
         self.firehose = Firehose(name, api=self.api, queue=Queue.Queue())
         self.inspector = Inspector(name, api=self.api, queue=self.firehose.queue)
         self.userstream = UserStream(name, api=self.api)
-        self.stats_lock = threading.Lock()
-
-        self.truncate_stats()
 
     def update_regex(self, t):
         term_regex = r'\b(?:' + '|'.join(self.api.config['terms']) + r')\b'
@@ -181,21 +169,4 @@ class GroteBroer1(object):
             self.log.info('Firehose new regex: %r', term_regex)
             self.inspector.terms = re.compile(term_regex)
             self.inspector.term_regex = term_regex
-        return True
-
-    def truncate_stats(self, t=None):
-        with self.stats_lock:
-            with open(self.STATS_FILENAME, 'w') as f:
-                f.truncate()
-        return True
-
-    def log_stats(self, t=None):
-        with self.stats_lock:
-            message = 'tweets={0} matched={1} handled={2} qsize={3}\n'.format(
-                self.firehose.stat_tweets, 
-                self.inspector.stat_matched, 
-                self.inspector.stat_handled,
-                self.firehose.queue.qsize())
-        with open(self.STATS_FILENAME, 'a') as f:
-            f.write(message)
         return True
