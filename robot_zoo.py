@@ -21,8 +21,9 @@ from bot import johndoeveloper as _johndoeveloper
 def parse_args():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-q', '--quiet', action='store_true', default=False, help='only output errors')
-    parser.add_argument('-d', '--debug', action='store_true', default=False, help='output everything')
+    parser.add_argument('-q', '--quiet',   action='store_true', default=False, help='only output errors')
+    parser.add_argument('-d', '--debug',   action='store_true', default=False, help='output everything')
+    parser.add_argument('-n', '--no-time', action='store_true', default=False, help="don't output date/time in logging")
     return parser.parse_args()
    
 class RobotZooCET(pycron.CronRunner):
@@ -105,9 +106,11 @@ if __name__ == '__main__':
 
     args = parse_args()
 
+    log_format = ('%(name)s - %(threadName)s - %(message)s' if args.no_time else '%(asctime)s %(name)s - %(threadName)s - %(message)s')
+
     logging.basicConfig(level=(logging.DEBUG if args.debug else
                                logging.ERROR if args.quiet else logging.INFO),
-                        format='%(asctime)s %(name)s - %(threadName)s - %(message)s',
+                        format=log_format,
                         datefmt='%Y-%m-%d %H:%M:%S')
 
     if not args.debug:
