@@ -16,7 +16,7 @@ class UserStream(object):
         self.api = api if api else twitter.TwitterAPI(name, self.log)
         self.userstream = userstream if userstream else twitter.UserStreamAPI(name)
 
-    @twitter.task('GroteBroer1-UserStream-{0}')
+    @twitter.task('GB1-User-{0}')
     def run(self, cancel):
         handlers = [
             (self.dm_cmd_answer_query,   re.compile(r'^\?$').match),
@@ -94,7 +94,7 @@ class Inspector(object):
         self.queue = queue if queue else Queue.Queue()
         self.term_regex = None
 
-    @twitter.task('GroteBroer1-Inspector-{0}')
+    @twitter.task('GB1-Inspect-{0}')
     def run(self, cancel):
         while True:
             tweet = self.queue.get()

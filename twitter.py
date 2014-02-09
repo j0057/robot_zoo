@@ -12,6 +12,7 @@ import functools
 import logging
 import platform
 
+import prctl
 import requests 
 
 import oauth1
@@ -51,14 +52,15 @@ def task(name):
         def task(self, count=1):
             def run():
                 try:
+                    prctl.set_name(threading.current_thread().name)
                     logging.getLogger(__name__).info('Starting, #%d', gettid())
                     f(self, cancel)
                 finally:
                     logging.getLogger(__name__).info('Exiting')
             cancel = Cancellation()
             for _ in range(count):
-                #thread = threading.Thread(name=name.format(task.i), target=f, args=[self, cancel])
-                thread = threading.Thread(name=name.format(task.i), target=run)
+                threadname = name.format(task.i)
+                thread = threading.Thread(name=threadname, target=run)
                 thread.start()
                 task.i += 1
             return cancel.cancel

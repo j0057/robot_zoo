@@ -26,7 +26,7 @@ class GeoTweets(object):
         self.create_raw()
         self.load_raw()
         
-    @twitter.task(name='GeoTweets-Processor-{0}')
+    @twitter.task(name='GeoTweets-{0}')
     def process(self, _):
         while True:
             tweet = self.queue.get()

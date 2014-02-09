@@ -13,7 +13,7 @@ class CronExecutor(object):
         self.log = logging.getLogger(__name__)
         self.queue = Queue.Queue()
 
-    @twitter.task('PyCron-Executor-{0}')
+    @twitter.task('Executor-{0}')
     def run(self, cancel):
         while True:
             action = self.queue.get()
@@ -96,7 +96,7 @@ class CronRunner(object):
                     prev_owner = curr_owner
                     yield action
 
-    @twitter.task('PyCron-Runner-{0}')
+    @twitter.task('Runner-{0}')
     def run(self, cancel):
         try:
             prev = None

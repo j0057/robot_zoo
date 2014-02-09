@@ -6,3 +6,4 @@ mock
 coverage
 unidecode
 pillow
+python-prctl
