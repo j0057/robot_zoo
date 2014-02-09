@@ -10,6 +10,7 @@ import threading
 import urllib2, base64, json, threading, Queue
 import functools
 import logging
+import platform
 
 import requests 
 
@@ -66,7 +67,13 @@ def task(name):
     return task
 
 def gettid():
-    return ctypes.CDLL('libc.so.6').syscall(186)
+    if platform.system() != 'Linux':
+        return -1
+    gettid = { 'armv6l': 224, 'x86_64': 186 }
+    machine = platform.machine()
+    if machine not in gettid:
+        return -1
+    return ctypes.CDLL('libc.so.6').syscall(gettid[machine])
 
 """
 class LoggingObject(object):
