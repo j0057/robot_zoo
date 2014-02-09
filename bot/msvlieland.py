@@ -1,6 +1,7 @@
 import datetime
 import logging
 import pprint
+import time
 
 import requests
 
@@ -11,6 +12,10 @@ import twitter
 # should normally only fetch one day (7 days into the future).
 # If the API returns an error for some reason, retry after 2 seconds, then 4, then 8, then 16.
 # If it still fails then, leave it -- the data should already have been prefetched.
+
+def slow(sleep, call):
+    time.sleep(sleep)
+    return call()
 
 class MsVlielandData(object):
     def __init__(self, log=None):
@@ -65,7 +70,7 @@ class MsVlielandData(object):
         today = datetime.date(y, m, d)
         dates = (today + datetime.timedelta(days=n) for n in xrange(1, 7))
         days = ((date.year, date.month, date.day) for date in dates)
-        self.departures.update(self.get_data(*day)
+        self.departures.update(slow(5, lambda: self.get_data(*day))
                                for day in days
                                if day not in self.departures)
 
