@@ -2,16 +2,27 @@
 LOG_FILE="${LOG_FILE-/var/log/robot-zoo.log}"
 
 generate_report() {
-    yesterday=$(date -d '1 day ago' '+%b %e')
-    today=$(date '+%b %e')
-    echo "Subject: Robot zoo log for $today"
+    echo "Subject: Robot zoo log for $(date '+%Y-%m-%d')"
     echo "To: $1"
     echo "Content-Type: text/html"
     echo
-    echo "<body><code><pre>"
-    grep "^$yesterday \\(1[2-9]\\|2[0-3]\\)" $LOG_FILE
-    grep "^$today"                           $LOG_FILE
-    echo "</pre></code></body>"
+    #echo "<body><code><pre>"
+    echo "<body><pre>"
+
+    yd=$(date -d '1 day ago' '+%b %e')
+    td=$(date                '+%b %e')
+
+    for filename in `ls -r ${LOG_FILE}*`; do
+        if [[ "$filename" == *.gz ]]; then
+            gunzip < "$filename"
+        else
+            cat "$filename"
+        fi
+    done | grep "^\(${yd} \(1\[2-9]\|2[0-3]\)\|${td}\)"
+
+    echo "</pre>"
+    echo "</body>"
+    #echo "</pre></code></body>"
 }
 
 if [ $# -eq 0 ]; then
