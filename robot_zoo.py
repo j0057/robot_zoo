@@ -73,8 +73,8 @@ class RobotZooCET(pycron.CronRunner):
             , ('01-59/15 *        *        *        *        *        *       ', grotebroer1.update_regex)
 
             #   ........ ........ ........ ........ ........ ........ ........  geotweets
-            , ('05       *        *        *        *        *        *       ', geotweets.save_raw)
-            , ('04       *        *        *        *        *        *       ', geotweets.create_viz)
+            , ('05       00-59/10 *        *        *        *        *       ', geotweets.save_raw)
+            , ('04       00-59/10 *        *        *        *        *       ', geotweets.create_viz)
 
             #   -------- -------- -------- -------- -------- -------- --------
         )
