@@ -18,7 +18,7 @@ generate_report() {
         else
             cat "$filename"
         fi
-    done | grep "^\(${yd} \(1\[2-9]\|2[0-3]\)\|${td}\)"
+    done | grep "^\(${yd} \(1[2-9]\|2[0-3]\)\|${td}\)"
 
     echo "</pre>"
     echo "</body>"
