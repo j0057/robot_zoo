@@ -34,6 +34,8 @@ class Firehose(object):
                     self.log.info('%s: %s (%d)', warning['code'], warning['message'], warning['percent_full'])
                     continue
                 self.enqueue(tweet)
+        except Exception as e:
+            self.log.exception('WTF: %s', e)
         finally:
             self.enqueue(None)
 
