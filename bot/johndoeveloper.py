@@ -23,19 +23,23 @@ class Firehose(object):
     @twitter.task(name='Firehose-{0}')
     def run(self, cancel):
         try:
-            firehose = self.stream.get_statuses_filter(locations=self.locations, stall_warnings=True)
-            for tweet in firehose:
-                if cancel: 
-                    break
-                if not tweet: 
-                    continue
-                if 'warning' in tweet:
-                    warning = tweet['warning']
-                    self.log.info('%s: %s (%d)', warning['code'], warning['message'], warning['percent_full'])
-                    continue
-                self.enqueue(tweet)
+            while not cancel:
+                self.log.info('Opening stream...')
+                firehose = self.stream.get_statuses_filter(locations=self.locations, stall_warnings=True)
+                for tweet in firehose:
+                    if cancel: 
+                        break
+                    if not tweet: 
+                        continue
+                    if 'warning' in tweet:
+                        warning = tweet['warning']
+                        self.log.info('%s: %s (%d)', warning['code'], warning['message'], warning['percent_full'])
+                        continue
+                    self.enqueue(tweet)
+                else:
+                    self.log.info('Stream ended!')
         except Exception as e:
-            self.log.exception('WTF: %s', e)
+            self.log.exception('WTF: %r', e)
         finally:
             self.enqueue(None)
 
