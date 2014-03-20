@@ -1,5 +1,5 @@
 QUIET = --quiet
-PKG = /tmp/pypkg27
+PKG = $(HOME)/pypkg27
 
 .PHONY: test
 
