@@ -26,7 +26,14 @@ class Luchtalarm(object):
         self.log.info('Posting status: %r (%d)', status, len(status))
         self.api.post_statuses_update(status=status)
         return True
-   
+
+    @twitter.retry
+    def bevrijdingsdag_2014(self, t):
+        status = u"(Bevrijdingsdag; vandaag geen luchtalarm)"
+        self.log.info('Posting status: %r (%d)', status, len(status))
+        self.api.post_statuses_update(status=status)
+        return True
+
     @twitter.retry 
     def sound_alarm(self, t):
         status = self.luchtalarm(t.tm_mon, t.tm_year)
