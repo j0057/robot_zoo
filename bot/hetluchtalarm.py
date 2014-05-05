@@ -29,7 +29,7 @@ class Luchtalarm(object):
 
     @twitter.retry
     def bevrijdingsdag_2014(self, t):
-        status = u"(Bevrijdingsdag; vandaag geen luchtalarm)"
+        status = u"\u2002"
         self.log.info('Posting status: %r (%d)', status, len(status))
         self.api.post_statuses_update(status=status)
         return True
