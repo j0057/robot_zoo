@@ -1,19 +1,21 @@
-Name                Stmts   Miss Branch BrMiss  Cover
------------------------------------------------------
-bot/__init__            0      0      0      0   100%
-bot/casio_f91w        101      0     30      0   100%
-bot/convertbot         25      0      2      0   100%
-bot/deoldehove         30      0      4      0   100%
-bot/geotweets          79     47     22     19    35%
-bot/grotebroer1       176     12     46      5    92%
-bot/hetluchtalarm      28      0      0      0   100%
-bot/maanfase           56      0     14      0   100%
-bot/msvlieland         20      0      0      0   100%
-bot/y2k38warning       37      0      0      0   100%
-holidays               23      0     17      0   100%
-oauth1                 57      0     16      0   100%
-pycron                108     41     49     16    64%
-robot_zoo              73     44      8      5    40%
-twitter               165     44     32     18    69%
------------------------------------------------------
-TOTAL                 978    188    240     63    79%
+Name                           Stmts   Miss Branch BrMiss  Cover
+----------------------------------------------------------------
+robot_zoo/__init__                 0      0      0      0   100%
+robot_zoo/__main__                80     48      8      5    40%
+robot_zoo/bot/__init__             0      0      0      0   100%
+robot_zoo/bot/casio_f91w         104      0     30      0   100%
+robot_zoo/bot/convertbot          23      0      2      0   100%
+robot_zoo/bot/deoldehove          26      0      4      0   100%
+robot_zoo/bot/geotweets           65     32     14     11    46%
+robot_zoo/bot/grotebroer1        111     68     30     28    32%
+robot_zoo/bot/hetluchtalarm       22      0      0      0   100%
+robot_zoo/bot/johndoeveloper      34     21     12     12    28%
+robot_zoo/bot/maanfase            53      0     14      0   100%
+robot_zoo/bot/msvlieland          76     27     22     15    57%
+robot_zoo/bot/y2k38warning        35      0      0      0   100%
+robot_zoo/holidays                26      0     19      0   100%
+robot_zoo/oauth1                  57      0     16      0   100%
+robot_zoo/pycron                  92     29     47     14    69%
+robot_zoo/twitter                153     75     30     25    45%
+----------------------------------------------------------------
+TOTAL                            957    300    248    110    66%

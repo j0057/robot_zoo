@@ -3,8 +3,8 @@ import unittest
 
 import mock
 
-import twitter
-import bot.deoldehove
+from robot_zoo import twitter
+from robot_zoo.bot import deoldehove
 
 class TestDeOldehove(unittest.TestCase):
     def setUp(self):
@@ -27,7 +27,7 @@ class TestDeOldehove(unittest.TestCase):
         }
         self.api.post_statuses_update.return_value = True
 
-        self.deoldehove = bot.deoldehove.DeOldehove('deoldehove', self.api)
+        self.deoldehove = deoldehove.DeOldehove('deoldehove', self.api)
 
     def _time(self, s):
         return time.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
@@ -71,25 +71,3 @@ class TestDeOldehove(unittest.TestCase):
         t = self._time('2013-06-09T14:00:00Z')
         self.deoldehove.sound_clock_into_the_grave(t)
         self.api.post_statuses_update.assert_called_once_with(status=u'METAL! METAL!')
-        
-class TestDeOldehove_Fail(unittest.TestCase):
-    def setUp(self):
-        self.api = mock.Mock()
-
-        self.api.config = { 
-            'default': {
-                'separator': ' ',
-                'sound' : 'BOING!'
-            }
-        }
-        self.api.post_statuses_update.side_effect = twitter.FailWhale
-
-        self.deoldehove = bot.deoldehove.DeOldehove('deoldehove', self.api)
-
-    def _time(self, s):
-        return time.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
-
-    def test_fail(self):
-        t = self._time('2013-06-09T14:00:00Z')
-        result = self.deoldehove.sound_clock(t)
-        self.assertFalse(result)

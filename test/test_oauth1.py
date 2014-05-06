@@ -2,7 +2,7 @@ import unittest
 
 import mock
 
-import oauth1
+from robot_zoo import oauth1
 
 class TestOauth1(unittest.TestCase):
     """

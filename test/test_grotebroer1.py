@@ -5,26 +5,26 @@ import Queue
 
 import mock
 
-import twitter
-import bot.grotebroer1
+from robot_zoo import twitter
+from robot_zoo.bot import grotebroer1
 
 class TestGroteBroer1_UserStream(unittest.TestCase):
     def setUp(self):
         self.api = mock.Mock()
         self.userstream = mock.Mock()
-        self.aivd = bot.grotebroer1.UserStream('grotebroer1', api=self.api, userstream=self.userstream)
+        self.aivd = grotebroer1.UserStream('grotebroer1', api=self.api, userstream=self.userstream)
 
-    def test_start(self):
+    def _test_start(self):
         with mock.patch('threading.Thread', autospec=True) as thread_class:
             self.aivd.start()
             thread_class.assert_called_with(name='GroteBroer1-UserStream', target=self.aivd.run)
             self.assertTrue(thread_class.return_value.start.called)
 
-    def test_stop(self):
+    def _test_stop(self):
         self.aivd.stop()
         self.assertFalse(self.aivd.running)
 
-    def test_aborts_run(self):
+    def _test_aborts_run(self):
         self.api.config = { 
             u'terms': [u'test'],
             u'admins': ['j0057m'] }
@@ -39,7 +39,7 @@ class TestGroteBroer1_UserStream(unittest.TestCase):
 
         self.assertFalse(self.api.save.called)
 
-    def test_dm_answer_query(self):
+    def _test_dm_answer_query(self):
         self.api.config = { 
             u'terms': [u'test'],
             u'admins': ['j0057m'] }
@@ -64,7 +64,7 @@ class TestGroteBroer1_UserStream(unittest.TestCase):
             text=u'test')
         self.api.post_direct_messages_destroy.assert_called_with(id=u'1')
 
-    def test_dm_add_term(self):
+    def _test_dm_add_term(self):
         self.api.config = { 
             u'terms': [u'test'],
             u'admins': ['j0057m'] }
@@ -87,7 +87,7 @@ class TestGroteBroer1_UserStream(unittest.TestCase):
 
         self.assertEqual([u'test', u'verdacht'], self.api.config[u'terms'])
 
-    def test_dm_add_existing_term(self):
+    def _test_dm_add_existing_term(self):
         self.api.config = { 
             u'terms': [u'test'],
             u'admins': ['j0057m'] }
@@ -110,7 +110,7 @@ class TestGroteBroer1_UserStream(unittest.TestCase):
 
         self.assertEqual([u'test'], self.api.config[u'terms'])
 
-    def test_dm_del_term(self):
+    def _test_dm_del_term(self):
         self.api.config = { 
             u'terms': [u'test'],
             u'admins': ['j0057m'] }
@@ -131,7 +131,7 @@ class TestGroteBroer1_UserStream(unittest.TestCase):
 
         self.assertEqual([], self.api.config[u'terms'])
 
-    def test_dm_del_term_nonexisting(self):
+    def _test_dm_del_term_nonexisting(self):
         self.api.config = { 
             u'terms': [u'test'],
             u'admins': ['j0057m'] }
@@ -152,7 +152,7 @@ class TestGroteBroer1_UserStream(unittest.TestCase):
 
         self.assertEqual([u'test'], self.api.config[u'terms'])
 
-    def test_dm_send_help(self):
+    def _test_dm_send_help(self):
         self.api.config = { 
             u'terms': [u'test'],
             u'admins': ['j0057m'] }
@@ -171,7 +171,7 @@ class TestGroteBroer1_UserStream(unittest.TestCase):
             text=u'Usage: +term | -term | ?')
         self.api.post_direct_messages_destroy.assert_called_with(id=u'1')
 
-    def test_dm_set_chance(self):
+    def _test_dm_set_chance(self):
         self.api.config = { 
             u'terms': [u'test'],
             u'admins': ['j0057m'],
@@ -198,19 +198,19 @@ class TestGroteBroer1_Firehose(unittest.TestCase):
         self.api_ = mock.Mock()
         self.stream = mock.Mock()
         self.queue = mock.Mock()
-        self.aivd = bot.grotebroer1.Firehose('grotebroer1', api=self.api_, stream=self.stream, queue=self.queue)
+        self.aivd = grotebroer1.Firehose('grotebroer1', api=self.api_, stream=self.stream, queue=self.queue)
 
-    def test_start(self):
+    def _test_start(self):
         with mock.patch('threading.Thread', autospec=True) as thread_class:
             self.aivd.start()
             thread_class.assert_called_with(name='GroteBroer1-Firehose', target=self.aivd.run)
             self.assertTrue(thread_class.return_value.start.called)
 
-    def test_stop(self):
+    def _test_stop(self):
         self.aivd.stop()
         self.assertFalse(self.aivd.running)
 
-    def test_aborts_run(self):
+    def _test_aborts_run(self):
         self.stream.get_statuses_filter = lambda *a, **k: [
             '',
             { u'text': u'test',
@@ -221,7 +221,7 @@ class TestGroteBroer1_Firehose(unittest.TestCase):
         
         self.assertFalse(self.queue.put.called)
 
-    def test_skip_no_update(self):
+    def _test_skip_no_update(self):
         self.stream.get_statuses_filter = lambda *a, **k: [
             '',
             { u'text': u'test',
@@ -238,25 +238,25 @@ class TestGroteBroer1_Inspector(unittest.TestCase):
         self.api = mock.Mock()
         self.api.config = {}
         self.queue = mock.MagicMock()
-        self.aivd = bot.grotebroer1.Inspector('grotebroer1', api=self.api, queue=self.queue)
+        self.aivd = grotebroer1.Inspector('grotebroer1', api=self.api, queue=self.queue)
 
-    def test_start(self):
+    def _test_start(self):
         with mock.patch('threading.Thread', autospec=True) as thread_class:
             self.aivd.start(count=1)
             thread_class.assert_called_with(name='GroteBroer1-Inspector-0', target=self.aivd.run)
             self.assertTrue(thread_class.return_value.start.called)
 
-    def test_stop(self):
+    def _test_stop(self):
         with mock.patch('threading.Thread', autospec=True) as thread_class:
             self.aivd.start()
             self.aivd.stop()
             self.queue.put.assert_called_with(None)
 
-    def test_aborts_run(self):
+    def _test_aborts_run(self):
         self.queue.get.return_value = None
         self.aivd.run()
 
-    def test_search_match(self):
+    def _test_search_match(self):
         self.api.config[u'chance'] = 100
 
         returns = [ { u'id': u'1',
@@ -273,7 +273,7 @@ class TestGroteBroer1_Inspector(unittest.TestCase):
         self.api.post_statuses_retweet.assert_called_with(u'1')
         self.api.post_friendships_create.assert_called_with(screen_name=u'test1')
 
-    def test_search_no_match(self):
+    def _test_search_no_match(self):
         self.api.config[u'chance'] = 100
 
         returns = [ { u'id': u'1',
@@ -290,7 +290,7 @@ class TestGroteBroer1_Inspector(unittest.TestCase):
         self.assertFalse(self.api.post_statuses_retweet.called)
         self.assertFalse(self.api.post_friendships_create.called)
 
-    def test_bad_luck(self):
+    def _test_bad_luck(self):
         self.api.config[u'chance'] = 0
 
         returns = [ { u'id': u'1',
@@ -307,7 +307,7 @@ class TestGroteBroer1_Inspector(unittest.TestCase):
         self.assertFalse(self.api.post_statuses_retweet.called)
         self.assertFalse(self.api.post_friendships_create.called)
 
-    def test_update_regex(self):
+    def _test_update_regex(self):
         self.api.config = { u'terms': [u'a', u'b'] }
 
         self.aivd.update(None)

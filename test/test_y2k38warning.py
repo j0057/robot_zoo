@@ -4,8 +4,8 @@ import unittest
 
 import mock
 
-import twitter
-import bot.y2k38warning
+from robot_zoo import twitter
+from robot_zoo.bot import y2k38warning
 
 class TestY2K38Warning(unittest.TestCase):
     def setUp(self):
@@ -14,7 +14,7 @@ class TestY2K38Warning(unittest.TestCase):
         self.api.log.return_value = None
         self.api.post_statuses_update.return_value = True
 
-        self.y2k38warning = bot.y2k38warning.Y2K38Warning('y2k38warning', self.api)
+        self.y2k38warning = y2k38warning.Y2K38Warning('y2k38warning', self.api)
 
     def _time(self, s):
         return time.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
@@ -84,18 +84,3 @@ class TestY2K38Warning(unittest.TestCase):
         self.api.post_statuses_update.assert_called_once_with(
             status='Y2K38 is here! Watch out for falling airplanes!')
 
-class Y2K38WarningFail(unittest.TestCase):
-    def setUp(self):
-        self.api = mock.Mock()
-
-        self.api.log.return_value = None
-        self.api.post_statuses_update.side_effect = twitter.FailWhale
-
-        self.y2k38warning = bot.y2k38warning.Y2K38Warning('y2k38warning', self.api)
-
-    def _time(self, s):
-        return time.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
-
-    def test_fail_whale(self):
-        self.y2k38warning.every_second(self._time('2038-01-19T03:14:06Z'))
-        self.api.log.assert_called_with('FAIL WHALE: {0}', ())
