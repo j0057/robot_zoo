@@ -30,8 +30,7 @@ def retry(f):
             try:
                 if i > 1:
                     self.log.info('Attempt %d, t=%d', i, t)
-                f(self, *a, **k)
-                break
+                return f(self, *a, **k)
             except FailWhale as e:
                 self.log.info("Retry caught %s - %r", type(e).__name__, e)
                 time.sleep(t)

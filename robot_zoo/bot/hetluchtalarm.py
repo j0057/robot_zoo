@@ -1,6 +1,6 @@
 import logging
 
-import twitter
+from .. import twitter
 
 class Luchtalarm(object):
     def __init__(self, name, api=None):

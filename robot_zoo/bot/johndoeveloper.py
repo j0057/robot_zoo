@@ -2,7 +2,7 @@
 
 import logging
 
-import twitter
+from .. import twitter
 
 class Firehose(object):
     def __init__(self, name, locations, api=None, stream=None):

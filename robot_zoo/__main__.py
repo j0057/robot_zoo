@@ -4,8 +4,8 @@ import time
 import threading
 import logging
 
-import twitter
-import pycron
+from . import twitter
+from . import pycron
 
 from bot import casio_f91w as _casio_f91w             
 from bot import deoldehove as _deoldehove            
@@ -102,8 +102,18 @@ class RobotZooUTC(pycron.CronRunner):
         )
 
 
-if __name__ == '__main__':
+casio_f91w = _casio_f91w.CasioF91W('casio_f91w')
+deoldehove = _deoldehove.DeOldehove('deoldehove')
+msvlieland = _msvlieland.MsVlieland('msvlieland')
+hetluchtalarm = _hetluchtalarm.Luchtalarm('hetluchtalarm')
+convertbot = _convertbot.ConvertBot('convertbot')
+grotebroer1 = _grotebroer1.GroteBroer1('grotebroer1')
+y2k38warning = _y2k38warning.Y2K38Warning('y2k38warning')
+maanfase = _maanfase.Maanfase('maanfase')
+geotweets = _geotweets.GeoTweets('johndoeveloper')
+firehose = _johndoeveloper.Firehose('johndoeveloper', '3.23,50.75,7.23,53.75')
 
+if __name__ == '__main__':
     args = parse_args()
 
     log_format = ('%(name)s - %(threadName)s - %(message)s' if args.no_time else '%(asctime)s %(name)s - %(threadName)s - %(message)s')

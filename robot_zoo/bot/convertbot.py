@@ -2,7 +2,7 @@ import logging
 import re
 import random
 
-import twitter
+from .. import twitter
 
 class ConvertBot(object):
     def __init__(self, name, api=None):

@@ -9,7 +9,7 @@ import Queue
 import PIL
 import PIL.Image
 
-import twitter
+from .. import twitter
 
 class GeoTweets(object):
     def __init__(self, name, api=None, stream=None):

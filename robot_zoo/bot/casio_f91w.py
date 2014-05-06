@@ -5,7 +5,9 @@ import logging
 
 import pytz
 
-import twitter
+today = datetime.date.today
+
+from .. import twitter
 
 CET = pytz.timezone('Europe/Amsterdam')
 UTC = pytz.utc
@@ -48,7 +50,7 @@ class CasioF91W(object):
             th, tm = int(th), int(tm)
             zh, zm = int(zh), int(zm)
             sign = +1 if sign == '+' else -1
-            base = datetime.datetime.combine(datetime.date.today(), datetime.time(hour=th, minute=tm)).replace(tzinfo=UTC)
+            base = datetime.datetime.combine(today(), datetime.time(hour=th, minute=tm)).replace(tzinfo=UTC)
             offset = sign * datetime.timedelta(hours=zh, minutes=zm)
             d = (base - offset).astimezone(CET)
             return ((d.hour, d.minute), tweet)
@@ -62,7 +64,7 @@ class CasioF91W(object):
             sign = +1 if sign == '+' else -1
             if am_pm == 'AM' and th == 12: th -= 12
             if am_pm == 'PM' and th  < 12: th += 12
-            base = datetime.datetime.combine(datetime.date.today(), datetime.time(hour=th, minute=tm)).replace(tzinfo=UTC)
+            base = datetime.datetime.combine(today(), datetime.time(hour=th, minute=tm)).replace(tzinfo=UTC)
             offset = sign * datetime.timedelta(hours=zh, minutes=zm)
             d = (base - offset).astimezone(CET)
             return ((d.hour, d.minute), tweet)

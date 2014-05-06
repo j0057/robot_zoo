@@ -1,29 +1,29 @@
 QUIET = --quiet
 PKG = $(HOME)/pypkg27
+VIRTUALENV = virtualenv2
 
 .PHONY: test
 
-test: env env/.requirements
-	env/bin/python robot_zoo.py
+test: env/.requirements | env
+	env/bin/python -m robot_zoo
 
-run: env env/.requirements
-	env/bin/python robot_zoo.py --quiet
+run: env/.requirements | env
+	env/bin/python -m robot_zoo --quiet
 
-debug: env env/.requirements
-	env/bin/python robot_zoo.py --debug
+debug: env/.requirements | env
+	env/bin/python -m robot_zoo --debug
 
-unittest: env env/.requirements
-	env/bin/python -m unittest discover
+unittest: env/.requirements | env
+	env/bin/python -m unittest discover --verbose 2>&1 | tee test-report.txt
 
-coverage: env env/.requirements
+coverage: env/.requirements | env
 	env/bin/coverage erase
-	env/bin/coverage run --branch '--omit=env/*,test/*' -m unittest discover || true 
+	env/bin/coverage run --branch '--omit=env/*,test/*' -m unittest discover --verbose || true 
 	env/bin/coverage html 
-	env/bin/coverage annotate
 	env/bin/coverage report | tee coverage.txt
 
 env: $(PKG)-ok
-	virtualenv env $(QUIET)
+	$(VIRTUALENV) env $(QUIET)
 	env/bin/pip install --no-index --find-links=$(PKG) --use-wheel --upgrade pip setuptools wheel $(QUIET)
 
 env/.pkg-src: requirements.txt | env
@@ -40,7 +40,7 @@ env/.requirements: requirements.txt | env
 
 $(PKG)-ok:
 	mkdir -p $(PKG)
-	virtualenv pkg-env $(QUIET)
+	$(VIRTUALENV) pkg-env $(QUIET)
 	pkg-env/bin/pip install --upgrade pip setuptools wheel $(QUIET)
 	pkg-env/bin/pip install --no-use-wheel --download $(PKG) pip setuptools wheel $(QUIET)
 	pkg-env/bin/pip wheel --no-index --find-links=$(PKG) --use-wheel --wheel-dir=$(PKG) pip setuptools wheel $(QUIET)
@@ -50,11 +50,9 @@ $(PKG)-ok:
 download: env/.pkg-whl
 
 clean:
-	@rm -rf env
-	@find . -name '*.pyc' -delete
-
-really-clean: clean
-	@rm -rf $(PKG)
+	rm -rf env
+	find . -name '*.pyc' -print -delete
+	find . -name '*,cover' -print -delete
 
 continuous-%:
 	inotifywait -r . -q -m -e CLOSE_WRITE | grep --line-buffered '^.*\.py$$' | while read line; do clear; date; echo $$line; echo; make $*; done

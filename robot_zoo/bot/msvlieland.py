@@ -5,7 +5,7 @@ import time
 
 import requests
 
-import twitter
+from .. import twitter
 
 # When starting the service, prefetch departures for 7 days.
 # Every day at 00:00, update for that day and get any missing departures for the next 7 days --
@@ -81,11 +81,11 @@ class MsVlielandData(object):
 class MsVlieland(object):
     prevent_dupe = 0
 
-    def __init__(self, name, api=None):
+    def __init__(self, name, api=None, data=None):
         self.name = name
         self.log = logging.getLogger(__name__)
         self.api = api if api else twitter.TwitterAPI(name, self.log)
-        self.data = MsVlielandData(log=self.log)
+        self.data = data if data else MsVlielandData(log=self.log)
 
     @twitter.retry
     def update_departures(self, t):

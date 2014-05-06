@@ -7,7 +7,7 @@ import Queue
 
 import unidecode
 
-import twitter
+from .. import twitter
 
 class UserStream(object):
     def __init__(self, name, api=None, userstream=None):

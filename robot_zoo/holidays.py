@@ -11,8 +11,9 @@ class Holidays(object):
         self.year = year
 
     def __call__(self, month, day):
+        d = datetime.date(self.year, month, day)
         for (result, test) in self.rules:
-            if test(datetime.date(self.year, month, day)):
+            if test(d):
                 return result
 
     @property
@@ -30,18 +31,23 @@ class Holidays(object):
     def easter(self, days):
         return self.easter_date + dateutil.relativedelta.relativedelta(days=days)
 
+    def is_sunday(self, month, day):
+        return datetime.date(self.year, month, day).weekday() == 6
+
 class NL(Holidays):
     def __init__(self, year):
         super(NL, self).__init__(year,
-            ("Nieuwjaarsdag",                   lambda date: date == self.day(1, 1)),
-            ("Eerste Paasdag",                  lambda date: date == self.easter(+0)),
-            ("Tweede Paasdag",                  lambda date: date == self.easter(+1)),
-            ("Koninginnedag",                   lambda date: date == self.day(4, 30) and (1949 <= date.year <= 2013)),
-            ("Koningsdag",                      lambda date: date == self.day(4, 27) and (2014 <= date.year)),
-            ("Dodenherdenking",                 lambda date: date == self.day(5, 4)),
-            ("Bevrijdingsdag",                  lambda date: date == self.day(5, 5)),
-            ("Hemelvaartsdag",                  lambda date: date == self.easter(+39)),
-            ("Eerste Pinksterdag",              lambda date: date == self.easter(+49)),
-            ("Tweede Pinksterdag",              lambda date: date == self.easter(+50)),
-            ("Eerste Kerstdag",                 lambda date: date == self.day(12, 25)),
-            ("Tweede Kerstdag",                 lambda date: date == self.day(12, 26)))
+            ("Nieuwjaarsdag",      lambda d: d == self.day(1, 1)),
+            ("Eerste Paasdag",     lambda d: d == self.easter(+0)),
+            ("Tweede Paasdag",     lambda d: d == self.easter(+1)),
+            ("Koninginnedag",      lambda d: (1949 <= d.year <= 2013) 
+                                   and (d == (self.is_sunday(4, 30) and self.day(4, 29) or self.day(4, 30)))),
+            ("Koningsdag",         lambda d: (2014 <= d.year)
+                                   and (d == (self.is_sunday(4, 27) and self.day(4, 26) or self.day(4, 27)))),
+            ("Dodenherdenking",    lambda d: d == self.day(5, 4)),
+            ("Bevrijdingsdag",     lambda d: d == self.day(5, 5)),
+            ("Hemelvaartsdag",     lambda d: d == self.easter(+39)),
+            ("Eerste Pinksterdag", lambda d: d == self.easter(+49)),
+            ("Tweede Pinksterdag", lambda d: d == self.easter(+50)),
+            ("Eerste Kerstdag",    lambda d: d == self.day(12, 25)),
+            ("Tweede Kerstdag",    lambda d: d == self.day(12, 26)))
