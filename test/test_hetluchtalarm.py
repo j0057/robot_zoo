@@ -25,9 +25,9 @@ class TestHetLuchtalarm(unittest.TestCase):
                  + u'\u2002')
 
     def test_pasen_2013(self):
-        self.luchtalarm.tweede_paasdag_2013(self._time('2013-12-03T12:00:00Z'))
+        self.luchtalarm.sound_alarm(self._time('2013-04-01T12:00:00Z'))
         self.api.post_statuses_update.assert_called_with(
-            status='Vandaag als het goed is geen luchtalarm, vrolijk Pasen!')
+            status=u"(Tweede Paasdag \u2014 vandaag geen luchtalarm)")
 
     def test_bevrijdingsdag_2014(self):
         self.luchtalarm.sound_alarm(self._time('2014-05-05T12:00:00Z'))
