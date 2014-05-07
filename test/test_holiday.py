@@ -2,11 +2,11 @@ import unittest
 
 from robot_zoo import holidays
 
-class TestHoliday(unittest.TestCase):
+class TestHoliday2013(unittest.TestCase):
     def setUp(self):
         self.nl = holidays.NL(2013)
 
-    def test_nl_2013(self):
+    def test_nl(self):
         assert self.nl( 1,  1) == "Nieuwjaarsdag"
         assert self.nl( 3, 31) == "Eerste Paasdag"
         assert self.nl( 4,  1) == "Tweede Paasdag"
@@ -22,9 +22,11 @@ class TestHoliday(unittest.TestCase):
         assert self.nl(12, 25) == "Eerste Kerstdag"
         assert self.nl(12, 26) == "Tweede Kerstdag"
 
-    def test_nl_2014(self):
-        self.nl.year = 2014
+class TestHoliday2014(unittest.TestCase):
+    def setUp(self):
+        self.nl = holidays.NL(2014)
 
+    def test_nl(self):
         assert self.nl( 1,  1) == "Nieuwjaarsdag"
         assert self.nl( 4, 20) == "Eerste Paasdag"
         assert self.nl( 4, 21) == "Tweede Paasdag"
@@ -39,9 +41,11 @@ class TestHoliday(unittest.TestCase):
         assert self.nl(12, 25) == "Eerste Kerstdag"
         assert self.nl(12, 26) == "Tweede Kerstdag"
 
-    def test_nl_2015(self):
-        self.nl.year = 2015
+class TestHoliday2015(unittest.TestCase):
+    def setUp(self):
+        self.nl = holidays.NL(2015)
 
+    def test_nl(self):
         assert self.nl( 1,  1) == "Nieuwjaarsdag"
         assert self.nl( 4,  5) == "Eerste Paasdag"
         assert self.nl( 4,  6) == "Tweede Paasdag"
@@ -56,3 +60,10 @@ class TestHoliday(unittest.TestCase):
         assert self.nl(12, 25) == "Eerste Kerstdag"
         assert self.nl(12, 26) == "Tweede Kerstdag"
 
+class TestHolidayNone(unittest.TestCase):
+    def setUp(self):
+        self.nl = holidays.NL(None)
+
+    def test_set_year(self):
+        self.nl.year = 2014
+        assert self.nl(6, 9) == "Tweede Pinksterdag"

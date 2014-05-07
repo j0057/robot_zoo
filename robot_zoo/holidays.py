@@ -8,6 +8,7 @@ import dateutil.relativedelta
 class Holidays(object):
     def __init__(self, year, *rules):
         self.rules = rules
+        self._year = None
         self.year = year
 
     def __call__(self, month, day):
@@ -22,6 +23,8 @@ class Holidays(object):
 
     @year.setter
     def year(self, value):
+        if self._year == value:
+            return
         self._year = value
         self.easter_date = dateutil.easter.easter(value)
 
