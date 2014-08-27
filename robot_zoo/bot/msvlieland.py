@@ -46,18 +46,32 @@ class MsVlielandData(object):
         response = requests.get(
             'http://m.rederij-doeksen.nl/api/departures', 
             params={
+                'route': '2',
                 'departure_date': '{0:04}-{1:02}-{2:02}'.format(y, m, d),
                 'departure_port': 'H',
                 'arrival_port': 'V',
+                #expiry[date(3i)]': '01',
+                #pax[K]': '0',
+                #pax[K4]': '0',
                 'pax[V]': '1',
-                'route': '2'},
+                #pax[V65]': '0',
+                #pax[S]': '0',
+                #pax[SSN]': '0',
+                #pax[ip]': '0',
+                #pax[pax]': '0',
+                #retour_journey': '1',
+                #return_date': '{0:04}-{1:02}-{2:02}'.format(y, m, d),
+                #ticket_type': 'twoway',
+                #only_available': '0'
+            },
             headers={
                 'User-Agent': requests.utils.default_user_agent() + ' (robot_zoo.py; j.j.molenaar@gmail.com namens https://twitter.com/msvlieland)' })
         response.raise_for_status()
         json = response.json()
+        self.log.debug(pprint.pformat(json))
         times = sorted(tuple(map(int, departure['departure_time'].split(' ')[1].split(':')[0:2]))
                        for departure in json['outwards'] 
-                       if departure['other'] == 'Veerdienst')
+                       if departure['other'] == 'Veerdienst Ms. Vlieland')
         return ((y,m,d), times)
 
     def delete_old(self, y, m, d):
@@ -112,8 +126,11 @@ class MsVlieland(object):
         return True
 
 if __name__ == '__main__':
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
+    print 'hoi'
     d = MsVlielandData()
-    d.date = (2014, 2, 5)
+    d.date = (2014, 8, 27)
     pprint.pprint(d.departures)
-    d.date = (2014, 2, 6)
+    d.date = (2014, 8, 28)
     pprint.pprint(d.departures)
