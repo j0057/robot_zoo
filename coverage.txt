@@ -1,21 +1,21 @@
 Name                           Stmts   Miss Branch BrMiss  Cover
 ----------------------------------------------------------------
 robot_zoo/__init__                 0      0      0      0   100%
-robot_zoo/__main__                80     48      8      5    40%
+robot_zoo/__main__                80     59      8      6    26%
 robot_zoo/bot/__init__             0      0      0      0   100%
 robot_zoo/bot/casio_f91w         104      0     30      0   100%
 robot_zoo/bot/convertbot          23      0      2      0   100%
 robot_zoo/bot/deoldehove          26      0      4      0   100%
-robot_zoo/bot/geotweets           65     32     14     11    46%
-robot_zoo/bot/grotebroer1        111     68     30     28    32%
+robot_zoo/bot/geotweets           65     48     14     12    24%
+robot_zoo/bot/grotebroer1        111     82     30     28    22%
 robot_zoo/bot/hetluchtalarm       23      0      2      0   100%
-robot_zoo/bot/johndoeveloper      34     21     12     12    28%
+robot_zoo/bot/johndoeveloper      34     27     12     12    15%
 robot_zoo/bot/maanfase            53      0     14      0   100%
-robot_zoo/bot/msvlieland          76     27     22     15    57%
+robot_zoo/bot/msvlieland          80     30     22     15    56%
 robot_zoo/bot/y2k38warning        35      0      0      0   100%
 robot_zoo/holidays                29      0     21      0   100%
 robot_zoo/oauth1                  57      0     16      0   100%
-robot_zoo/pycron                  92     29     47     14    69%
-robot_zoo/twitter                153     75     30     25    45%
+robot_zoo/pycron                  92     77     47     45    12%
+robot_zoo/twitter                153     76     30     25    45%
 ----------------------------------------------------------------
-TOTAL                            961    300    252    110    66%
+TOTAL                            965    399    252    143    55%

@@ -57,9 +57,9 @@ class TestMsVlielandData(unittest.TestCase):
         self.get = self.get_patch.start()
         self.get.return_value.json.return_value = {
             "outwards": [
-                { "departure_time": "2014-05-06 09:00:00", "other": "Veerdienst" },
-                { "departure_time": "2014-05-06 14:15:00", "other": "Veerdienst" },
-                { "departure_time": "2014-05-06 19:00:00", "other": "Veerdienst" } ],
+                { "departure_time": "2014-05-06 09:00:00", "other": "Veerdienst Ms. Vlieland" },
+                { "departure_time": "2014-05-06 14:15:00", "other": "Veerdienst Ms. Vlieland" },
+                { "departure_time": "2014-05-06 19:00:00", "other": "Veerdienst Ms. Vlieland" } ],
             "retour": [] }
 
         self.data = msvlieland.MsVlielandData(log=mock.Mock())
