@@ -7,4 +7,4 @@ setup(name='twitter',
       author_email='j.j.molenaar@gmail.com',
       version_command='git describe',
       packages=['robot_zoo'],
-      data_files=[ ('bin', 'bin/mail-log') ])
+      data_files=[ ('bin', ['bin/mail-log']) ])

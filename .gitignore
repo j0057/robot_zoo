@@ -7,3 +7,4 @@ htmlcov
 *.png
 *.log
 *,cover
+*.egg-info
