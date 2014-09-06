@@ -13,6 +13,6 @@ setup(name='twitter',
       author='Joost Molenaar',
       author_email='j.j.molenaar@gmail.com',
       version_command='git describe',
-      packages=['robot_zoo'],
+      packages=['robot_zoo', 'robot_zoo.bot'],
       data_files=[ ('bin', ['bin/mail-log']) ],
       install_requires=requirements)
