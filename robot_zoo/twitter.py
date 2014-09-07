@@ -77,58 +77,6 @@ def gettid():
         return -1
     return ctypes.CDLL('libc.so.6').syscall(gettid[machine])
 
-"""
-class LoggingObject(object):
-    LEVEL_DEBUG = 2
-    LEVEL_INFO = 1
-    LEVEL_ERROR = 0
-
-    LEVEL = LEVEL_INFO
-    #EVEL = LEVEL_DEBUG
-
-    OUTPUT_LOCK = threading.Lock()
-
-    def __log(self, level, message, *args):
-        if level > self.LEVEL:
-            return
-
-        if args: 
-            message = message.format(*args)
-
-        t = time.localtime()
-
-        with self.OUTPUT_LOCK:
-            for line in message.split('\n'):
-                print "{0:04}-{1:02}-{2:02} {3:02}:{4:02}:{5:02} [{6}] {7}".format(
-                    t.tm_year, t.tm_mon, t.tm_mday,
-                    t.tm_hour, t.tm_min, t.tm_sec,
-                    self.name,
-                    line)
-
-            sys.stdout.flush()
-
-    _name = None
-
-    @property
-    def name(self):
-        return self._name or type(self).__name__
-
-    @name.setter
-    def name(self, name):
-        self._name = name
-
-    def info(self, message, *args):
-        self.__log(LoggingObject.LEVEL_INFO, message, *args)
-
-    def error(self, message, *args):
-        self.__log(LoggingObject.LEVEL_ERROR, message, *args)
-
-    def debug(self, message, *args):
-        self.__log(LoggingObject.LEVEL_DEBUG, message, *args)
-
-    log = info
-"""
-
 class Configuration(object):
     def __init__(self, config_file=None, log=None):
         self.log = log if log else logging.getLogger(__name__)
