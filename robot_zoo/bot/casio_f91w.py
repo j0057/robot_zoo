@@ -29,7 +29,7 @@ class CasioF91W(object):
             config_file=os.environ.get('ROBOT_ZOO_LIB', '.') + '/' + self.name + '.json',
             default=lambda: {
                 'alarms': {},
-                'last_mention': None }
+                'last_mention': None })
 
     @twitter.retry
     def send_beep(self, t):
