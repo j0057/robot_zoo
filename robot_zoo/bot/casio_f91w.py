@@ -25,6 +25,11 @@ class CasioF91W(object):
         self.name = name
         self.log = logging.getLogger(__name__)
         self.api = api if api else twitter.TwitterAPI(name, self.log)
+        self.state = twitter.Configuration(
+            config_file=os.environ.get('ROBOT_ZOO_LIB', '.') + '/' + self.name + '.json',
+            default=lambda: {
+                'alarms': {},
+                'last_mention': None }
 
     @twitter.retry
     def send_beep(self, t):
@@ -36,9 +41,9 @@ class CasioF91W(object):
     def save_alarm(self, alarm, mention):
         key = '{0:02}:{1:02}'.format(*alarm)
         m_id, m_sn = mention['id'], mention['user']['screen_name']
-        if key not in self.api.config['alarms']:
-            self.api.config['alarms'][key] = {}
-        self.api.config['alarms'][key][m_id] = m_sn
+        if key not in self.state.config['alarms']:
+            self.state.config['alarms'][key] = {}
+        self.state.config['alarms'][key][m_id] = m_sn
 
     def parse_tweet_for_alarm(self, tweet):
         id, screen_name, text = tweet['id'], tweet['user']['screen_name'], tweet['text']
@@ -88,13 +93,13 @@ class CasioF91W(object):
         return (None, tweet)
             
     def get_mentions(self):
-        last_mention = self.api.config['last_mention']
+        last_mention = self.state.config['last_mention']
         if last_mention:
             mentions = self.api.get_statuses_mentions_timeline(count=200, since_id=last_mention)
         else:
             mentions = self.api.get_statuses_mentions_timeline(count=200)
         if mentions:
-            self.api.config['last_mention'] = str(max(int(m['id']) for m in mentions))
+            self.state.config['last_mention'] = str(max(int(m['id']) for m in mentions))
         return mentions
 
     @twitter.retry
@@ -106,21 +111,21 @@ class CasioF91W(object):
                 self.save_alarm(alarm, mention)
                 dirty = True
         if dirty:
-            self.api.save()
+            self.state.save()
         return True
 
     @twitter.retry
     def send_alarms(self, t):
         key = '{0:02}:{1:02}'.format(t.tm_hour, t.tm_min)
-        if key in self.api.config['alarms']:
-            for (tid, screen_name) in self.api.config['alarms'][key].items():
+        if key in self.state.config['alarms']:
+            for (tid, screen_name) in self.state.config['alarms'][key].items():
                 status = u'@{0}'.format(screen_name)
                 while len(status) < 130:
                     status += u' BEEP BEEP!'
                 self.log.info('Posting status: %s (%r)', repr(status), len(status))
                 self.api.post_statuses_update(status=status, in_reply_to_status_id=tid)
-                del self.api.config['alarms'][key][tid]
-                if not self.api.config['alarms'][key]:
-                    del self.api.config['alarms'][key]
-            self.api.save()
+                del self.state.config['alarms'][key][tid]
+                if not self.state.config['alarms'][key]:
+                    del self.state.config['alarms'][key]
+            self.state.save()
         return True
