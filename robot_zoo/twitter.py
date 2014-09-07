@@ -130,7 +130,8 @@ class LoggingObject(object):
 """
 
 class Configuration(object):
-    def __init__(self, config_file=None):
+    def __init__(self, config_file=None, log=None):
+        self.log = log if log else logging.getLogger(__name__)
         self.config = None
         self.config_file = config_file
         self.load()
@@ -157,9 +158,8 @@ class TwitterAPI(Configuration):
 
     def __init__(self, name, log=None):
         self.name = '@{0}'.format(name)
-        self.log = log if log else logging.getLogger(__name__)
         config_file = '{0}/{1}.json'.format(os.environ.get('ROBOT_ZOO_CONFIG', 'cfg'), name)
-        super(TwitterAPI, self).__init__(config_file)
+        super(TwitterAPI, self).__init__(config_file, log)
 
     def __getattr__(self, name):
         match = self.API_REGEX.match(name)
