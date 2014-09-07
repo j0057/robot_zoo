@@ -15,6 +15,7 @@ class UserStream(object):
         self.log = logging.getLogger(__name__)
         self.api = api if api else twitter.TwitterAPI(name, self.log)
         self.userstream = userstream if userstream else twitter.UserStreamAPI(name)
+        self.state = twitter.Configuration(os.environ.get('ROBOT_ZOO_LIB', '.') + '/' + name + '.json')
 
     @twitter.task('GB1-User-{0}')
     def run(self, cancel):
@@ -56,13 +57,13 @@ class UserStream(object):
         self.api.post_direct_messages_destroy(id=id)
 
     def dm_cmd_answer_query(self, text, sender_screen_name, id, **_):
-        return u','.join(self.api.config['terms'])
+        return u','.join(self.state.config['terms'])
 
     def dm_cmd_add_term(self, text, sender_screen_name, id, **_):
         term = text[1:].lower()
-        if term not in self.api.config['terms']:
-            self.api.config['terms'].append(term)
-            self.api.save()
+        if term not in self.state.config['terms']:
+            self.state.config['terms'].append(term)
+            self.state.save()
             return u"Term added: " + term
         else:
             return u"Term already in list: " + term
@@ -70,17 +71,17 @@ class UserStream(object):
     def dm_cmd_del_term(self, text, sender_screen_name, id, **_):
         term = text[1:].lower()
         try:
-            index = self.api.config['terms'].index(term)
-            del self.api.config['terms'][index]
-            self.api.save()
+            index = self.state.config['terms'].index(term)
+            del self.state.config['terms'][index]
+            self.state.save()
             return u"Term removed: " + term
         except ValueError:
             return u"Term not in list: " + term
 
     def dm_cmd_set_chance(self, text, sender_screen_name, id, **_):
         chance = int(text[:-1])
-        self.api.config["chance"] = chance
-        self.api.save()
+        self.state.config["chance"] = chance
+        self.state.save()
         return u"Retweet/follow chance is now {0}%".format(chance)
 
     def dm_cmd_send_help(self, text, sender_screen_name, id, **_):
@@ -93,6 +94,7 @@ class Inspector(object):
         self.api = api if api else twitter.TwitterAPI(name, self.log)
         self.queue = queue if queue else Queue.Queue()
         self.term_regex = None
+        self.state = twitter.Configuration(os.environ.get('ROBOT_ZOO_LIB', '.') + '/' + name + '.json')
 
     @twitter.task('GB1-Inspect-{0}')
     def run(self, cancel):
@@ -123,7 +125,7 @@ class Inspector(object):
         self.api.post_friendships_create(screen_name=tweet['user']['screen_name'])
  
     def handle_suspect(self, tweet, randint=random.randint):
-        if randint(1, 100) <= self.api.config["chance"]:
+        if randint(1, 100) <= self.state.config["chance"]:
             self.retweet(tweet)
             self.follow(tweet)
             return True
@@ -136,9 +138,10 @@ class GroteBroer1(object):
         self.api = api if api else twitter.TwitterAPI(name, self.log)
         self.inspector = Inspector(name, api=self.api, queue=Queue.Queue())
         self.userstream = UserStream(name, api=self.api)
+        self.state = twitter.Configuration(os.environ.get('ROBOT_ZOO_LIB', '.') + '/' + name + '.json')
 
     def update_regex(self, t):
-        term_regex = r'\b(?:' + '|'.join(self.api.config['terms']) + r')\b'
+        term_regex = r'\b(?:' + '|'.join(self.state.config['terms']) + r')\b'
         if self.inspector.term_regex != term_regex:
             self.log.info('Firehose new regex: %r', term_regex)
             self.inspector.terms = re.compile(term_regex)

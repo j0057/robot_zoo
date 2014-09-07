@@ -20,8 +20,10 @@ class GeoTweets(object):
         self.queue = Queue.Queue()
         self.lock = threading.RLock()
 
-        self.raw_name = 'nltweets-raw.png'
-        self.viz_name = 'nltweets.png'
+        lib_path = os.environ.get('ROBOT_ZOO_LIB', '.')
+
+        self.raw_name = lib_path + '/' + 'nltweets-raw.png'
+        self.viz_name = lib_path + '/' + 'nltweets.png'
 
         self.create_raw()
         self.load_raw()
