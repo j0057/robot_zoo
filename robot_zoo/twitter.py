@@ -11,6 +11,7 @@ import urllib2, base64, json, threading, Queue
 import functools
 import logging
 import platform
+import os
 
 import prctl
 import requests 
@@ -157,7 +158,7 @@ class TwitterAPI(Configuration):
     def __init__(self, name, log=None):
         self.name = '@{0}'.format(name)
         self.log = log if log else logging.getLogger(__name__)
-        config_file = 'cfg/{0}.json'.format(name)
+        config_file = '{0}/{1}.json'.format(os.environ.get('ROBOT_ZOO_CONFIG', 'cfg'), name)
         super(TwitterAPI, self).__init__(config_file)
 
     def __getattr__(self, name):
