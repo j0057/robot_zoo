@@ -10,13 +10,21 @@ import unidecode
 
 from .. import twitter
 
+DEFAULT_CONFIG = lambda: {
+    'terms': [],
+    'chance': 0
+}
+
 class UserStream(object):
     def __init__(self, name, api=None, userstream=None):
         self.name = name
         self.log = logging.getLogger(__name__)
         self.api = api if api else twitter.TwitterAPI(name, self.log)
         self.userstream = userstream if userstream else twitter.UserStreamAPI(name)
-        self.state = twitter.Configuration(os.environ.get('ROBOT_ZOO_LIB', '.') + '/' + name + '.json')
+        self.state = twitter.Configuration(
+            config_file=os.environ.get('ROBOT_ZOO_LIB', '.') + '/' + name + '.json',
+            default=DEFAULT_CONFIG)
+            
 
     @twitter.task('GB1-User-{0}')
     def run(self, cancel):
@@ -95,7 +103,9 @@ class Inspector(object):
         self.api = api if api else twitter.TwitterAPI(name, self.log)
         self.queue = queue if queue else Queue.Queue()
         self.term_regex = None
-        self.state = twitter.Configuration(os.environ.get('ROBOT_ZOO_LIB', '.') + '/' + name + '.json')
+        self.state = twitter.Configuration(
+            config_file=os.environ.get('ROBOT_ZOO_LIB', '.') + '/' + name + '.json',
+            default=DEFAULT_CONFIG)
 
     @twitter.task('GB1-Inspect-{0}')
     def run(self, cancel):
@@ -139,7 +149,9 @@ class GroteBroer1(object):
         self.api = api if api else twitter.TwitterAPI(name, self.log)
         self.inspector = Inspector(name, api=self.api, queue=Queue.Queue())
         self.userstream = UserStream(name, api=self.api)
-        self.state = twitter.Configuration(os.environ.get('ROBOT_ZOO_LIB', '.') + '/' + name + '.json')
+        self.state = twitter.Configuration(
+            config_file=os.environ.get('ROBOT_ZOO_LIB', '.') + '/' + name + '.json',
+            default=DEFAULT_CONFIG)
 
     def update_regex(self, t):
         term_regex = r'\b(?:' + '|'.join(self.state.config['terms']) + r')\b'

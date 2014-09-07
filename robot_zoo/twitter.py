@@ -78,17 +78,21 @@ def gettid():
     return ctypes.CDLL('libc.so.6').syscall(gettid[machine])
 
 class Configuration(object):
-    def __init__(self, config_file=None, log=None):
+    def __init__(self, config_file=None, log=None, default=lambda: {}):
         self.log = log if log else logging.getLogger(__name__)
         self.config = None
         self.config_file = config_file
+        self.default = default
         self.load()
 
     def load(self):
         if self.config_file:
             self.log.info('Loading %s', self.config_file)
-            with open(self.config_file, 'rb') as f:
-                self.config = json.load(f)
+            try:
+                with open(self.config_file, 'rb') as f:
+                    self.config = json.load(f)
+            except IOError:
+                self.config = self.default()
 
     def save(self):
         if self.config_file:
