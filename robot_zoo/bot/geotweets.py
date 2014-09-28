@@ -75,6 +75,6 @@ class GeoTweets(object):
                     cache[v] = self.viz[i] = int(math.log(v+1) / math.log(highest+1) * 255) * 0x010101
         img = PIL.Image.frombuffer('RGBA', (1024, 768), self.viz, 'raw', 'RGBA', 0, 1)
         img = img.convert('RGB')
-        img.save(self.viz_name + '_')
-        os.rename(self.viz_name + '_', self.viz_name)
+        img.save(self.viz_name.replace('.png', '_.png'))
+        os.rename(self.viz_name.replace('.png', '_.png'), self.viz_name)
         #raise Exception("BANGK!")
