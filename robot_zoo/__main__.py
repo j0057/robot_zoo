@@ -162,10 +162,12 @@ if __name__ == '__main__':
     cancel = [ cron_cet.run(),
                cron_utc.run(),
                executor.run(count=4),
-               grotebroer1.userstream.run(),
-               grotebroer1.inspector.run(),
-               geotweets.process(),
-               firehose.run() ]
+               #grotebroer1.userstream.run(),
+               #grotebroer1.inspector.run(),
+               #geotweets.process(),
+               #firehose.run() 
+    ]
+
     try:
         while True: 
             time.sleep(1)
