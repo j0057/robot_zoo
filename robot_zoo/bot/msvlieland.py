@@ -119,7 +119,7 @@ class MsVlieland(object):
         if date not in self.data.departures: return True
         if time not in self.data.departures[date]: return True
 
-        status = u'TOET TOET TOET' + (u'\u2002' * self.prevent_dupe)
+        status = u'TOET TOET TOET' + (u'\u00ad' * self.prevent_dupe)
         self.prevent_dupe = (self.prevent_dupe + 1) % 3
         self.log.info("Posting status: %r (%s)", status, len(status))
         self.api.post_statuses_update(status=status)

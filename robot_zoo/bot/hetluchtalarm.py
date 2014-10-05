@@ -12,8 +12,8 @@ class Luchtalarm(object):
 
     def stuffing(self, month, year):
         year -= 2012
-        return (unicode(bin(month)[2:].rjust(4, '0')).replace('0', u'\u0020').replace('1', u'\u2002')
-              + unicode(bin(year )[2:].rjust(4, '0')).replace('0', u'\u0020').replace('1', u'\u2002')
+        return (unicode(bin(month)[2:].rjust(4, '0')).replace('0', u'\u0020').replace('1', u'\u00ad')
+              + unicode(bin(year )[2:].rjust(4, '0')).replace('0', u'\u0020').replace('1', u'\u00ad')
               + u'\u2002')
 
     def luchtalarm(self, month, year):

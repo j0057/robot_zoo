@@ -21,7 +21,7 @@ class DeOldehove(object):
         if times <  1: 
             times += 12
 
-        status = sep.join([snd] * times) + (u'\u2002' * stuffing)
+        status = sep.join([snd] * times) + (u'\u00ad' * stuffing)
 
         self.log.info('Posting status: %r (%d)', status, len(status))
         self.api.post_statuses_update(status=status)
