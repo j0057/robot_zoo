@@ -1,7 +1,7 @@
 import time
 import unittest
 import re
-import Queue
+import queue
 
 import mock
 
@@ -26,14 +26,14 @@ class TestGroteBroer1_UserStream(unittest.TestCase):
 
     def test_aborts_run(self):
         self.api.config = { 
-            u'terms': [u'test'],
-            u'admins': ['j0057m'] }
+            'terms': ['test'],
+            'admins': ['j0057m'] }
 
         self.userstream.get_user.return_value = [
-            { u'direct_message': { u'id': u'1',
-                                   u'text': u'+verdacht',
-                                   u'sender_screen_name': u'j0057m',
-                                   u'sender': { u'screen_name': u'j0057m' } } } ]
+            { 'direct_message': { 'id': '1',
+                                   'text': '+verdacht',
+                                   'sender_screen_name': 'j0057m',
+                                   'sender': { 'screen_name': 'j0057m' } } } ]
         
         self.aivd.run()
 
@@ -41,157 +41,157 @@ class TestGroteBroer1_UserStream(unittest.TestCase):
 
     def test_dm_answer_query(self):
         self.api.config = { 
-            u'terms': [u'test'],
-            u'admins': ['j0057m'] }
+            'terms': ['test'],
+            'admins': ['j0057m'] }
 
         self.userstream.get_user.return_value = [
             { 'something_else': {} },
             '',
-            { 'direct_message': { u'id': u'1',
-                                  u'text': u'?',
-                                  u'sender_screen_name': u'j0057m',
-                                  u'sender': { u'screen_name': u'j0057m' } } },
-            { 'direct_message': { u'id': u'2',
-                                  u'text': u'who am i?',
-                                  u'sender_screen_name': u'not_an_admin',
-                                  u'sender': { u'screen_name': u'not_an_admin' } } } ]
+            { 'direct_message': { 'id': '1',
+                                  'text': '?',
+                                  'sender_screen_name': 'j0057m',
+                                  'sender': { 'screen_name': 'j0057m' } } },
+            { 'direct_message': { 'id': '2',
+                                  'text': 'who am i?',
+                                  'sender_screen_name': 'not_an_admin',
+                                  'sender': { 'screen_name': 'not_an_admin' } } } ]
 
         self.aivd.running = True
         self.aivd.run()
 
         self.api.post_direct_messages_new.assert_called_with(
-            screen_name=u'j0057m',
-            text=u'test')
-        self.api.post_direct_messages_destroy.assert_called_with(id=u'1')
+            screen_name='j0057m',
+            text='test')
+        self.api.post_direct_messages_destroy.assert_called_with(id='1')
 
     def test_dm_add_term(self):
         self.api.config = { 
-            u'terms': [u'test'],
-            u'admins': ['j0057m'] }
+            'terms': ['test'],
+            'admins': ['j0057m'] }
 
         self.userstream.get_user.return_value = [
-            { u'direct_message': { u'id': u'1',
-                                   u'text': u'+verdacht',
-                                   u'sender_screen_name': u'j0057m',
-                                   u'sender': { u'screen_name': u'j0057m' } } } ]
+            { 'direct_message': { 'id': '1',
+                                   'text': '+verdacht',
+                                   'sender_screen_name': 'j0057m',
+                                   'sender': { 'screen_name': 'j0057m' } } } ]
 
         self.aivd.running = True
         self.aivd.run()
 
         self.api.post_direct_messages_new.assert_called_with(
-            screen_name=u'j0057m',
-            text=u'Term added: verdacht')
-        self.api.post_direct_messages_destroy.assert_called_with(id=u'1')
+            screen_name='j0057m',
+            text='Term added: verdacht')
+        self.api.post_direct_messages_destroy.assert_called_with(id='1')
 
         self.assertTrue(self.api.save.called)
 
-        self.assertEqual([u'test', u'verdacht'], self.api.config[u'terms'])
+        self.assertEqual(['test', 'verdacht'], self.api.config['terms'])
 
     def test_dm_add_existing_term(self):
         self.api.config = { 
-            u'terms': [u'test'],
-            u'admins': ['j0057m'] }
+            'terms': ['test'],
+            'admins': ['j0057m'] }
 
         self.userstream.get_user.return_value = [
-            { u'direct_message': { u'id': u'1',
-                                   u'text': u'+test',
-                                   u'sender_screen_name': u'j0057m',
-                                   u'sender': { u'screen_name': u'j0057m' } } } ]
+            { 'direct_message': { 'id': '1',
+                                   'text': '+test',
+                                   'sender_screen_name': 'j0057m',
+                                   'sender': { 'screen_name': 'j0057m' } } } ]
 
         self.aivd.running = True
         self.aivd.run()
 
         self.api.post_direct_messages_new.assert_called_with(
-            screen_name=u'j0057m',
-            text=u'Term already in list: test')
-        self.api.post_direct_messages_destroy.assert_called_with(id=u'1')
+            screen_name='j0057m',
+            text='Term already in list: test')
+        self.api.post_direct_messages_destroy.assert_called_with(id='1')
 
         self.assertFalse(self.api.save.called)
 
-        self.assertEqual([u'test'], self.api.config[u'terms'])
+        self.assertEqual(['test'], self.api.config['terms'])
 
     def test_dm_del_term(self):
         self.api.config = { 
-            u'terms': [u'test'],
-            u'admins': ['j0057m'] }
+            'terms': ['test'],
+            'admins': ['j0057m'] }
 
         self.userstream.get_user.return_value = [
-            { u'direct_message': { u'id': u'1',
-                                   u'text': u'-test',
-                                   u'sender_screen_name': u'j0057m',
-                                   u'sender': { u'screen_name': u'j0057m' } } } ]
+            { 'direct_message': { 'id': '1',
+                                   'text': '-test',
+                                   'sender_screen_name': 'j0057m',
+                                   'sender': { 'screen_name': 'j0057m' } } } ]
 
         self.aivd.running = True
         self.aivd.run()
 
         self.api.post_direct_messages_new.assert_called_with(
-            screen_name=u'j0057m',
-            text=u'Term removed: test')
-        self.api.post_direct_messages_destroy.assert_called_with(id=u'1')
+            screen_name='j0057m',
+            text='Term removed: test')
+        self.api.post_direct_messages_destroy.assert_called_with(id='1')
 
-        self.assertEqual([], self.api.config[u'terms'])
+        self.assertEqual([], self.api.config['terms'])
 
     def test_dm_del_term_nonexisting(self):
         self.api.config = { 
-            u'terms': [u'test'],
-            u'admins': ['j0057m'] }
+            'terms': ['test'],
+            'admins': ['j0057m'] }
 
         self.userstream.get_user.return_value = [
-            { u'direct_message': { u'id': u'1',
-                                   u'text': u'-verdacht',
-                                   u'sender_screen_name': u'j0057m',
-                                   u'sender': { u'screen_name': u'j0057m' } } } ]
+            { 'direct_message': { 'id': '1',
+                                   'text': '-verdacht',
+                                   'sender_screen_name': 'j0057m',
+                                   'sender': { 'screen_name': 'j0057m' } } } ]
 
         self.aivd.running = True
         self.aivd.run()
 
         self.api.post_direct_messages_new.assert_called_with(
-            screen_name=u'j0057m',
-            text=u'Term not in list: verdacht')
-        self.api.post_direct_messages_destroy.assert_called_with(id=u'1')
+            screen_name='j0057m',
+            text='Term not in list: verdacht')
+        self.api.post_direct_messages_destroy.assert_called_with(id='1')
 
-        self.assertEqual([u'test'], self.api.config[u'terms'])
+        self.assertEqual(['test'], self.api.config['terms'])
 
     def test_dm_send_help(self):
         self.api.config = { 
-            u'terms': [u'test'],
-            u'admins': ['j0057m'] }
+            'terms': ['test'],
+            'admins': ['j0057m'] }
 
         self.userstream.get_user.return_value = [
-            { u'direct_message': { u'id': u'1',
-                                   u'text': u'spam',
-                                   u'sender_screen_name': u'j0057m',
-                                   u'sender': { u'screen_name': u'j0057m' } } } ]
+            { 'direct_message': { 'id': '1',
+                                   'text': 'spam',
+                                   'sender_screen_name': 'j0057m',
+                                   'sender': { 'screen_name': 'j0057m' } } } ]
 
         self.aivd.running = True
         self.aivd.run()
 
         self.api.post_direct_messages_new.assert_called_with(
-            screen_name=u'j0057m',
-            text=u'Usage: +term | -term | ?')
-        self.api.post_direct_messages_destroy.assert_called_with(id=u'1')
+            screen_name='j0057m',
+            text='Usage: +term | -term | ?')
+        self.api.post_direct_messages_destroy.assert_called_with(id='1')
 
     def test_dm_set_chance(self):
         self.api.config = { 
-            u'terms': [u'test'],
-            u'admins': ['j0057m'],
-            u'chance': 13 }
+            'terms': ['test'],
+            'admins': ['j0057m'],
+            'chance': 13 }
 
         self.userstream.get_user.return_value = [
-            { u'direct_message': { u'id': u'1',
-                                   u'text': u'42%',
-                                   u'sender_screen_name': u'j0057m',
-                                   u'sender': { u'screen_name': u'j0057m' } } } ]
+            { 'direct_message': { 'id': '1',
+                                   'text': '42%',
+                                   'sender_screen_name': 'j0057m',
+                                   'sender': { 'screen_name': 'j0057m' } } } ]
 
         self.aivd.running = True
         self.aivd.run()
 
         self.api.post_direct_messages_new.assert_called_with(
-            screen_name=u'j0057m',
-            text=u'Retweet/follow chance is now 42%')
-        self.api.post_direct_messages_destroy.assert_called_with(id=u'1')
+            screen_name='j0057m',
+            text='Retweet/follow chance is now 42%')
+        self.api.post_direct_messages_destroy.assert_called_with(id='1')
 
-        self.assertEqual(self.api.config[u'chance'], 42)
+        self.assertEqual(self.api.config['chance'], 42)
 
 class TestGroteBroer1_Firehose(unittest.TestCase):
     def setUp(self):
@@ -213,9 +213,9 @@ class TestGroteBroer1_Firehose(unittest.TestCase):
     def test_aborts_run(self):
         self.stream.get_statuses_filter = lambda *a, **k: [
             '',
-            { u'text': u'test',
-              u'id': u'1',
-              u'user': { 'screen_name': 'test1' } } ]
+            { 'text': 'test',
+              'id': '1',
+              'user': { 'screen_name': 'test1' } } ]
 
         self.aivd.run()
         
@@ -224,9 +224,9 @@ class TestGroteBroer1_Firehose(unittest.TestCase):
     def test_skip_no_update(self):
         self.stream.get_statuses_filter = lambda *a, **k: [
             '',
-            { u'text': u'test',
-              u'id': u'1',
-              u'user': { 'screen_name': 'test1' } } ]
+            { 'text': 'test',
+              'id': '1',
+              'user': { 'screen_name': 'test1' } } ]
 
         self.aivd.running = True
         self.aivd.run()
@@ -257,11 +257,11 @@ class TestGroteBroer1_Inspector(unittest.TestCase):
         self.aivd.run()
 
     def test_search_match(self):
-        self.api.config[u'chance'] = 100
+        self.api.config['chance'] = 100
 
-        returns = [ { u'id': u'1',
-                      u'text': u'test',
-                      u'user': { u'screen_name': u'test1' } },
+        returns = [ { 'id': '1',
+                      'text': 'test',
+                      'user': { 'screen_name': 'test1' } },
                     None ]
         self.queue.get.side_effect = lambda: returns.pop(0)
 
@@ -270,15 +270,15 @@ class TestGroteBroer1_Inspector(unittest.TestCase):
 
         self.aivd.run()
 
-        self.api.post_statuses_retweet.assert_called_with(u'1')
-        self.api.post_friendships_create.assert_called_with(screen_name=u'test1')
+        self.api.post_statuses_retweet.assert_called_with('1')
+        self.api.post_friendships_create.assert_called_with(screen_name='test1')
 
     def test_search_no_match(self):
-        self.api.config[u'chance'] = 100
+        self.api.config['chance'] = 100
 
-        returns = [ { u'id': u'1',
-                      u'text': u'text',
-                      u'user': { u'screen_name': u'test1' } },
+        returns = [ { 'id': '1',
+                      'text': 'text',
+                      'user': { 'screen_name': 'test1' } },
                     None ]
         self.queue.get.side_effect = lambda: returns.pop(0)
 
@@ -291,11 +291,11 @@ class TestGroteBroer1_Inspector(unittest.TestCase):
         self.assertFalse(self.api.post_friendships_create.called)
 
     def test_bad_luck(self):
-        self.api.config[u'chance'] = 0
+        self.api.config['chance'] = 0
 
-        returns = [ { u'id': u'1',
-                      u'text': u'test',
-                      u'user': { u'screen_name': u'test1' } },
+        returns = [ { 'id': '1',
+                      'text': 'test',
+                      'user': { 'screen_name': 'test1' } },
                     None ]
         self.queue.get.side_effect = lambda: returns.pop(0)
 
@@ -308,7 +308,7 @@ class TestGroteBroer1_Inspector(unittest.TestCase):
         self.assertFalse(self.api.post_friendships_create.called)
 
     def test_update_regex(self):
-        self.api.config = { u'terms': [u'a', u'b'] }
+        self.api.config = { 'terms': ['a', 'b'] }
 
         self.aivd.update(None)
         self.aivd.update(None)

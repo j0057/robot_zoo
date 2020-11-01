@@ -23,16 +23,16 @@ class TestMsVlieland(unittest.TestCase):
 
     def test_stuffing(self):
         self.msvlieland.sound_horn(self._time('2013-12-02T09:00:00Z'))
-        self.api.post_statuses_update.assert_called_with(status=u'TOET TOET TOET')
+        self.api.post_statuses_update.assert_called_with(status='TOET TOET TOET')
 
         self.msvlieland.sound_horn(self._time('2013-12-02T14:15:00Z'))
-        self.api.post_statuses_update.assert_called_with(status=u'TOET TOET TOET\u2002')
+        self.api.post_statuses_update.assert_called_with(status='TOET TOET TOET\\u2002')
 
         self.msvlieland.sound_horn(self._time('2013-12-02T19:00:00Z'))
-        self.api.post_statuses_update.assert_called_with(status=u'TOET TOET TOET\u2002\u2002')
+        self.api.post_statuses_update.assert_called_with(status='TOET TOET TOET\\u2002\\u2002')
 
         self.msvlieland.sound_horn(self._time('2013-12-03T09:00:00Z'))
-        self.api.post_statuses_update.assert_called_with(status=u'TOET TOET TOET')
+        self.api.post_statuses_update.assert_called_with(status='TOET TOET TOET')
 
 class TestMsVlieland_Fail(unittest.TestCase):
     def setUp(self):

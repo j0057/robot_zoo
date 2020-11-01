@@ -16,12 +16,12 @@ class DeOldehove(object):
         stuffing = (t.tm_hour or 24) if t.tm_min == 30 else 0
 
         times = 1 if t.tm_min == 30 else t.tm_hour
-        if times > 12: 
+        if times > 12:
             times -= 12
-        if times <  1: 
+        if times <  1:
             times += 12
 
-        status = sep.join([snd] * times) + (u'\u2002' * stuffing)
+        status = sep.join([snd] * times) + ('\u2002' * stuffing)
 
         self.log.info('Posting status: %r (%d)', status, len(status))
         self.api.post_statuses_update(status=status)
@@ -36,6 +36,3 @@ class DeOldehove(object):
 
     def sound_clock_into_the_grave(self, t):
         return self.post_status(t, self.api.config['metal'])
-
-
-

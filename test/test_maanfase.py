@@ -51,9 +51,10 @@ class TestMaanfase(unittest.TestCase):
         self.assertTrue(result)
         self.assertTrue(self.api.post_statuses_update.called)
         self.api.post_statuses_update.assert_called_once_with(
-            status=u'Om 10:28:05 is het volle maan.')
-        
+            status='10:28:05 ― volle maan.')
+
     def test_failure(self):
         self.api.post_statuses_update.side_effect = twitter.FailWhale
-        result = self.maanfase.post_phase(self._time('2013-12-17T10:28:00Z'))
+        with mock.patch('time.sleep'):
+            result = self.maanfase.post_phase(self._time('2013-12-17T10:28:00Z'))
         self.assertFalse(result)

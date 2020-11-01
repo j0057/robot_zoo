@@ -1,19 +1,19 @@
 
 import ctypes
 import json
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 import re
 import time
 import sys
 import threading
-import urllib2, base64, json, threading, Queue
+import urllib.request, urllib.error, urllib.parse, base64, json, threading, queue
 import functools
 import logging
 import platform
 
 import prctl
-import requests 
+import requests
 
 import oauth1
 
@@ -30,8 +30,7 @@ def retry(f):
             try:
                 if i > 1:
                     self.log.info('Attempt %d, t=%d', i, t)
-                f(self, *a, **k)
-                break
+                return f(self, *a, **k)
             except FailWhale as e:
                 self.log.info("Retry caught %s - %r", type(e).__name__, e)
                 time.sleep(t)
@@ -41,7 +40,7 @@ def retry(f):
 
 class Cancellation(object):
     canceled = False
-    def __nonzero__(self):
+    def __bool__(self):
         return self.canceled
     def cancel(self):
         self.canceled = True
@@ -76,58 +75,6 @@ def gettid():
     if machine not in gettid:
         return -1
     return ctypes.CDLL('libc.so.6').syscall(gettid[machine])
-
-"""
-class LoggingObject(object):
-    LEVEL_DEBUG = 2
-    LEVEL_INFO = 1
-    LEVEL_ERROR = 0
-
-    LEVEL = LEVEL_INFO
-    #EVEL = LEVEL_DEBUG
-
-    OUTPUT_LOCK = threading.Lock()
-
-    def __log(self, level, message, *args):
-        if level > self.LEVEL:
-            return
-
-        if args: 
-            message = message.format(*args)
-
-        t = time.localtime()
-
-        with self.OUTPUT_LOCK:
-            for line in message.split('\n'):
-                print "{0:04}-{1:02}-{2:02} {3:02}:{4:02}:{5:02} [{6}] {7}".format(
-                    t.tm_year, t.tm_mon, t.tm_mday,
-                    t.tm_hour, t.tm_min, t.tm_sec,
-                    self.name,
-                    line)
-
-            sys.stdout.flush()
-
-    _name = None
-
-    @property
-    def name(self):
-        return self._name or type(self).__name__
-
-    @name.setter
-    def name(self, name):
-        self._name = name
-
-    def info(self, message, *args):
-        self.__log(LoggingObject.LEVEL_INFO, message, *args)
-
-    def error(self, message, *args):
-        self.__log(LoggingObject.LEVEL_ERROR, message, *args)
-
-    def debug(self, message, *args):
-        self.__log(LoggingObject.LEVEL_DEBUG, message, *args)
-
-    log = info
-"""
 
 class Configuration(object):
     def __init__(self, config_file=None):
@@ -169,12 +116,12 @@ class TwitterAPI(Configuration):
         method, path, obj = match.groups()
         method = method.upper()
 
-        obj = obj[1:] 
+        obj = obj[1:]
 
         def generate_caller(method, path, obj):
             def caller(*args, **kwargs):
-                args = map(str, args)
-                kwargs = { k: unicode(v).encode('utf8') for (k, v) in kwargs.items() }
+                args = list(map(str, args))
+                kwargs = { k: str(v).encode('utf8') for (k, v) in kwargs.items() }
                 url = ('https://'
                     + self.API_HOST
                     + '/'
@@ -239,5 +186,3 @@ class StreamAPI(TwitterAPI):
 
 class UserStreamAPI(StreamAPI):
     API_HOST = 'userstream.twitter.com'
-
-

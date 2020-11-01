@@ -2,7 +2,7 @@ import logging
 import re
 import sys
 import time
-import threading, Queue
+import threading, queue
 import traceback
 
 import twitter
@@ -11,7 +11,7 @@ class CronExecutor(object):
     def __init__(self):
         self.name = 'executor'
         self.log = logging.getLogger(__name__)
-        self.queue = Queue.Queue()
+        self.queue = queue.Queue()
 
     @twitter.task('Executor-{0}')
     def run(self, cancel):
@@ -45,7 +45,7 @@ class CronRunner(object):
         DAYS     = 'mon tue wed thu fri sat sun'.split()
 
         rule = rule.lower().split()
-        name = action.im_self.name if hasattr(action, 'im_self') else ''
+        name = action.__self__.name if hasattr(action, 'im_self') else ''
         self.log.info('%s %-16s %-32s', ' '.join('{0:9}'.format(r) for r in rule), name, action.__name__)
 
         # replace * with 00-00/01 on the left side of the first non-*
@@ -89,9 +89,9 @@ class CronRunner(object):
         prev_owner = object()
         curr_owner = None
         for rule, action in self.rules:
-            values = zip([t.tm_sec, t.tm_min, t.tm_hour, t.tm_mday, t.tm_mon, t.tm_year, t.tm_wday], rule)
+            values = list(zip([t.tm_sec, t.tm_min, t.tm_hour, t.tm_mday, t.tm_mon, t.tm_year, t.tm_wday], rule))
             if all(check(x, *r) for (x, r) in values):
-                curr_owner = action.im_self if hasattr(action, 'im_self') else None
+                curr_owner = action.__self__ if hasattr(action, 'im_self') else None
                 if curr_owner != prev_owner:
                     prev_owner = curr_owner
                     yield action

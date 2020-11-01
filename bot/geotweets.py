@@ -4,7 +4,7 @@ import math
 import os
 import os.path
 import threading
-import Queue
+import queue
 
 import PIL
 import PIL.Image
@@ -17,7 +17,7 @@ class GeoTweets(object):
         self.log = logging.getLogger(__name__)
         self.api = api if api else twitter.TwitterAPI(name, self.log)
         self.stream = stream if stream else twitter.StreamAPI(name, self.log)
-        self.queue = Queue.Queue()
+        self.queue = queue.Queue()
         self.lock = threading.RLock()
 
         self.raw_name = 'nltweets-raw.png'

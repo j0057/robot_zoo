@@ -44,7 +44,7 @@ class MsVlielandData(object):
     def get_data(self, y, m, d):
         self.log.info('Getting departures for %s', (y, m, d))
         response = requests.get(
-            'http://m.rederij-doeksen.nl/api/departures', 
+            'http://m.rederij-doeksen.nl/api/departures',
             params={
                 'route': '2',
                 'departure_date': '{0:04}-{1:02}-{2:02}'.format(y, m, d),
@@ -70,7 +70,7 @@ class MsVlielandData(object):
         json = response.json()
         self.log.debug(pprint.pformat(json))
         times = sorted(tuple(map(int, departure['departure_time'].split(' ')[1].split(':')[0:2]))
-                       for departure in json['outwards'] 
+                       for departure in json['outwards']
                        if departure['other'] == 'Veerdienst Ms. Vlieland')
         return ((y,m,d), times)
 
@@ -82,7 +82,7 @@ class MsVlielandData(object):
 
     def prefetch_week(self, y, m, d):
         today = datetime.date(y, m, d)
-        dates = (today + datetime.timedelta(days=n) for n in xrange(1, 7))
+        dates = (today + datetime.timedelta(days=n) for n in range(1, 7))
         days = ((date.year, date.month, date.day) for date in dates)
         self.departures.update(slow(5, lambda: self.get_data(*day))
                                for day in days
@@ -119,7 +119,7 @@ class MsVlieland(object):
         if date not in self.data.departures: return True
         if time not in self.data.departures[date]: return True
 
-        status = u'TOET TOET TOET' + (u'\u2002' * self.prevent_dupe)
+        status = 'TOET TOET TOET' + ('\u2002' * self.prevent_dupe)
         self.prevent_dupe = (self.prevent_dupe + 1) % 3
         self.log.info("Posting status: %r (%s)", status, len(status))
         self.api.post_statuses_update(status=status)
@@ -128,7 +128,7 @@ class MsVlieland(object):
 if __name__ == '__main__':
     import logging
     logging.basicConfig(level=logging.DEBUG)
-    print 'hoi'
+    print('hoi')
     d = MsVlielandData()
     d.date = (2014, 8, 27)
     pprint.pprint(d.departures)

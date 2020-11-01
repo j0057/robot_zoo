@@ -12,7 +12,8 @@ UTC = pytz.utc
 
 class CasioF91W(object):
     DAYS = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
-    MSG = u'BEEP BEEP! {0} {1} {2:02}:{3:02}:00'
+    # TODO: change to f-string
+    MSG = 'BEEP BEEP! {0} {1} {2:02}:{3:02}:00'
 
     R1 = re.compile(r'alarm ([01]?[0-9]|2[0-3]):([0-5][0-9]) ([+-])([01][0-9]|2[0-3])([0-5][0-9])')
     R2 = re.compile(r'alarm (0?[1-9]|1[0-2]):([0-5][0-9]) (AM|PM) ([+-])([01][0-9]|2[0-3])([0-5][0-9])')
@@ -52,7 +53,7 @@ class CasioF91W(object):
             offset = sign * datetime.timedelta(hours=zh, minutes=zm)
             d = (base - offset).astimezone(CET)
             return ((d.hour, d.minute), tweet)
-        
+
         match = self.R2.search(text) # hh:mm <AM|PM> <+|->hhmm
         if match:
             self.log.info('Alarm: #%d from @%s: %s --> %r', id, screen_name, repr(text), match.groups())
@@ -84,7 +85,7 @@ class CasioF91W(object):
             return ((th, tm), tweet)
 
         return (None, tweet)
-            
+
     def get_mentions(self):
         last_mention = self.api.config['last_mention']
         if last_mention:
@@ -111,10 +112,10 @@ class CasioF91W(object):
     def send_alarms(self, t):
         key = '{0:02}:{1:02}'.format(t.tm_hour, t.tm_min)
         if key in self.api.config['alarms']:
-            for (tid, screen_name) in self.api.config['alarms'][key].items():
-                status = u'@{0}'.format(screen_name)
+            for (tid, screen_name) in [*self.api.config['alarms'][key].items()]:
+                status = '@{0}'.format(screen_name)
                 while len(status) < 130:
-                    status += u' BEEP BEEP!'
+                    status += ' BEEP BEEP!'
                 self.log.info('Posting status: %s (%r)', repr(status), len(status))
                 self.api.post_statuses_update(status=status, in_reply_to_status_id=tid)
                 del self.api.config['alarms'][key][tid]

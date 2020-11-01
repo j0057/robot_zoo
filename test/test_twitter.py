@@ -48,7 +48,7 @@ class TestTwitterAPI(unittest.TestCase):
 
     def test_post_tweet(self):
         with mock.patch('oauth1.Oauth1') as oauth1:
-            self.api.post_statuses_update(status=u'test')
+            self.api.post_statuses_update(status='test')
 
             oauth1.assert_called_with(config=mock.ANY, stream=False)
             oauth1.return_value.request.assert_called_with(

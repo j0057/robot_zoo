@@ -3,13 +3,13 @@ import os
 import time
 import hashlib
 import hmac
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 import requests
 
 nonce = lambda n=36: os.urandom(n).encode('base64').strip().replace('/','-').replace('+','_')
 timestamp = lambda: str(int(time.time()))
-urlencode = lambda s: urllib.quote(s, safe='')
+urlencode = lambda s: urllib.parse.quote(s, safe='')
 urlencode_dict = lambda d: '&'.join('{0}={1}'.format(urlencode(k), urlencode(d[k])) for k in sorted(d.keys()))
 
 def hmac_sha1(key, s):

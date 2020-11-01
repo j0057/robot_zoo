@@ -10,9 +10,9 @@ import twitter
 TZ_UTC = pytz.utc
 TZ_CET = pytz.timezone('Europe/Amsterdam')
 
-PHASE_NAME = ['nieuwe maan', 
-              'eerste kwartier', 
-              'volle maan', 
+PHASE_NAME = ['nieuwe maan',
+              'eerste kwartier',
+              'volle maan',
               'laatste kwartier']
 
 PHASE_FUNC = [ephem.next_new_moon,
@@ -38,7 +38,7 @@ class MoonModel(object):
             self._phases = { (d.year, d.month, d.day, d.hour, d.minute): (d.hour, d.minute, d.second, phase)
                              for (phase, d) in self._calc_phases(time, phase) }
         else:
-            self._phases = {} 
+            self._phases = {}
 
     def _first_phase(self, year):
         times = [ (i, f(year)) for (i, f) in enumerate(PHASE_FUNC) ]
@@ -74,9 +74,8 @@ class Maanfase(object):
             return True
 
         h, m, s, phase = result
-        status = u"Om {0:02}:{1:02}:{2:02} is het {3}.".format(h, m, s, PHASE_NAME[phase])
+        status = f"{h:02}:{m:02}:{s:02} ― {PHASE_NAME[phase]}."
 
         self.log.info("Posting status: %r (%d)", status, len(status))
         self.api.post_statuses_update(status=status)
         return True
-

@@ -7,8 +7,8 @@ import logging
 import twitter
 import pycron
 
-from bot import casio_f91w as _casio_f91w             
-from bot import deoldehove as _deoldehove            
+from bot import casio_f91w as _casio_f91w
+from bot import deoldehove as _deoldehove
 from bot import msvlieland as _msvlieland
 from bot import hetluchtalarm as _hetluchtalarm
 from bot import convertbot as _convertbot
@@ -25,7 +25,7 @@ def parse_args():
     parser.add_argument('-d', '--debug',   action='store_true', default=False, help='output everything')
     parser.add_argument('-n', '--no-time', action='store_true', default=False, help="don't output date/time in logging")
     return parser.parse_args()
-   
+
 class RobotZooCET(pycron.CronRunner):
     def __init__(self, name, executor):
         super(RobotZooCET, self).__init__(name, time.localtime, executor,
@@ -88,7 +88,7 @@ class RobotZooUTC(pycron.CronRunner):
             #   -------- -------- -------- -------- -------- --------- --------
 
             #   ........ ........ ........ ........ ........ ......... ........  @y2k38warning (2038-01-19 03:14:07)
-              ('07       14       03       19       01       2013-2036 *       ', y2k38warning.yearly) 
+              ('07       14       03       19       01       2013-2036 *       ', y2k38warning.yearly)
             , ('07       14       03       19       01-11    2037      *       ', y2k38warning.monthly)
             , ('07       14       03       19-31    12       2037      *       ', y2k38warning.daily)
             , ('07       14       03       01-17    01       2038      *       ', y2k38warning.daily)
@@ -117,7 +117,7 @@ if __name__ == '__main__':
     if not args.debug:
         logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.ERROR)
 
-    if args.quiet: twitter.LoggingObject.LEVEL = twitter.LoggingObject.LEVEL_ERROR 
+    if args.quiet: twitter.LoggingObject.LEVEL = twitter.LoggingObject.LEVEL_ERROR
     if args.debug: twitter.LoggingObject.LEVEL = twitter.LoggingObject.LEVEL_DEBUG
 
     logging.info('Robot zoo starting')
@@ -159,11 +159,11 @@ if __name__ == '__main__':
                geotweets.process(),
                firehose.run() ]
     try:
-        while True: 
+        while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print
+        print()
         logging.info('Main thread got keyboard interrupt')
     finally:
-        map(lambda cancel: cancel(), cancel)
-
+        for c in cancel:
+            c()

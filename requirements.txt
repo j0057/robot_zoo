@@ -2,8 +2,6 @@ pyephem
 pytz
 python-dateutil
 requests
-mock
-coverage
 unidecode
 pillow
 python-prctl

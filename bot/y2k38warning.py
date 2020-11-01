@@ -20,12 +20,12 @@ class Y2K38Warning(object):
         return self._tweet_message(message)
 
     @twitter.retry
-    def yearly(self, t): 
+    def yearly(self, t):
         left = 2038 - t.tm_year
         return self._tweet_remaining(left, 'years' if left != 1 else 'year')
 
     @twitter.retry
-    def monthly(self, t): 
+    def monthly(self, t):
         left = ((1 - t.tm_mon) % 12) or 12
         return self._tweet_remaining(left, 'months' if left != 1 else 'month')
 
@@ -35,7 +35,7 @@ class Y2K38Warning(object):
         return self._tweet_remaining(left, 'days' if left != 1 else 'day')
 
     @twitter.retry
-    def hourly(self, t): 
+    def hourly(self, t):
         left = ((3 - t.tm_hour) % 24) or 24
         return self._tweet_remaining(left, 'hours' if left != 1 else 'hour')
 
@@ -45,7 +45,7 @@ class Y2K38Warning(object):
         return self._tweet_remaining(left, 'minutes' if left != 1 else 'minute')
 
     @twitter.retry
-    def every_second(self, t): 
+    def every_second(self, t):
         left = ((7 - t.tm_sec) % 60) or 60
         return self._tweet_remaining(left, 'seconds' if left != 1 else 'second')
 
@@ -53,5 +53,3 @@ class Y2K38Warning(object):
     def zero(self, t):
         message = "Y2K38 is here! Watch out for falling airplanes!"
         return self._tweet_message(message)
-
-

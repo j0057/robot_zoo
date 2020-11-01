@@ -3,7 +3,7 @@ import time
 import threading
 import re
 import random
-import Queue 
+import queue
 
 import unidecode
 
@@ -36,8 +36,8 @@ class UserStream(object):
                     self.dm_print(**m)
                     continue
                 self.dm_print(**m)
-                answer = next(handler 
-                              for (handler, cond) in handlers 
+                answer = next(handler
+                              for (handler, cond) in handlers
                               if cond(m['text']))(**m)
                 self.dm_send_answer(answer, **m)
                 self.dm_delete(**m)
@@ -56,16 +56,16 @@ class UserStream(object):
         self.api.post_direct_messages_destroy(id=id)
 
     def dm_cmd_answer_query(self, text, sender_screen_name, id, **_):
-        return u','.join(self.api.config['terms'])
+        return ','.join(self.api.config['terms'])
 
     def dm_cmd_add_term(self, text, sender_screen_name, id, **_):
         term = text[1:].lower()
         if term not in self.api.config['terms']:
             self.api.config['terms'].append(term)
             self.api.save()
-            return u"Term added: " + term
+            return "Term added: " + term
         else:
-            return u"Term already in list: " + term
+            return "Term already in list: " + term
 
     def dm_cmd_del_term(self, text, sender_screen_name, id, **_):
         term = text[1:].lower()
@@ -73,25 +73,25 @@ class UserStream(object):
             index = self.api.config['terms'].index(term)
             del self.api.config['terms'][index]
             self.api.save()
-            return u"Term removed: " + term
+            return "Term removed: " + term
         except ValueError:
-            return u"Term not in list: " + term
+            return "Term not in list: " + term
 
     def dm_cmd_set_chance(self, text, sender_screen_name, id, **_):
         chance = int(text[:-1])
         self.api.config["chance"] = chance
         self.api.save()
-        return u"Retweet/follow chance is now {0}%".format(chance)
+        return "Retweet/follow chance is now {0}%".format(chance)
 
     def dm_cmd_send_help(self, text, sender_screen_name, id, **_):
-        return u"Usage: +term | -term | ?"
+        return "Usage: +term | -term | ?"
 
 class Inspector(object):
     def __init__(self, name, api=None, queue=None):
         self.name = name
         self.log = logging.getLogger(__name__)
         self.api = api if api else twitter.TwitterAPI(name, self.log)
-        self.queue = queue if queue else Queue.Queue()
+        self.queue = queue if queue else queue.Queue()
         self.term_regex = None
 
     @twitter.task('GB1-Inspect-{0}')
@@ -111,8 +111,8 @@ class Inspector(object):
             self.log.info('Match: #%s from @%s: %r', tweet['id'], tweet['user']['screen_name'], tweet['text'])
             return True
         return False
-  
-    @twitter.retry 
+
+    @twitter.retry
     def retweet(self, tweet):
         self.log.info('Retweeting #%s from @%s', tweet['id'], tweet['user']['screen_name'])
         self.api.post_statuses_retweet(tweet['id'])
@@ -121,7 +121,7 @@ class Inspector(object):
     def follow(self, tweet):
         self.log.info('Following user @%s', tweet['user']['screen_name'])
         self.api.post_friendships_create(screen_name=tweet['user']['screen_name'])
- 
+
     def handle_suspect(self, tweet, randint=random.randint):
         if randint(1, 100) <= self.api.config["chance"]:
             self.retweet(tweet)
@@ -134,7 +134,7 @@ class GroteBroer1(object):
         self.name = name
         self.log = logging.getLogger(__name__)
         self.api = api if api else twitter.TwitterAPI(name, self.log)
-        self.inspector = Inspector(name, api=self.api, queue=Queue.Queue())
+        self.inspector = Inspector(name, api=self.api, queue=queue.Queue())
         self.userstream = UserStream(name, api=self.api)
 
     def update_regex(self, t):

@@ -11,7 +11,7 @@ class TestDeOldehove(unittest.TestCase):
         self.api = mock.Mock()
 
         self.api.log.return_value = None
-        self.api.config = { 
+        self.api.config = {
             'default': {
                 'separator': ' ',
                 'sound' : 'BOING!'
@@ -36,13 +36,13 @@ class TestDeOldehove(unittest.TestCase):
         t = self._time('2013-12-15T23:00:00Z')
         self.deoldehove.sound_clock(t)
         self.api.post_statuses_update.assert_called_once_with(
-            status=' '.join([u'BOING!']*11))
+            status=' '.join(['BOING!']*11))
 
     def test_00_00(self):
         t = self._time('2013-12-16T00:00:00Z')
         self.deoldehove.sound_clock(t)
         self.api.post_statuses_update.assert_called_once_with(
-            status=' '.join([u'BOING!']*12))
+            status=' '.join(['BOING!']*12))
 
     def test_half_hours(self):
         t1 = self._time('2013-12-15T01:30:00Z')
@@ -51,32 +51,32 @@ class TestDeOldehove(unittest.TestCase):
         t4 = self._time('2013-12-15T04:30:00Z')
 
         self.deoldehove.sound_clock(t1)
-        self.api.post_statuses_update.assert_called_with(status=u'BOING!\u2002')
+        self.api.post_statuses_update.assert_called_with(status='BOING!\u2002')
 
         self.deoldehove.sound_clock(t2)
-        self.api.post_statuses_update.assert_called_with(status=u'BOING!\u2002\u2002')
+        self.api.post_statuses_update.assert_called_with(status='BOING!\u2002\u2002')
 
         self.deoldehove.sound_clock(t3)
-        self.api.post_statuses_update.assert_called_with(status=u'BOING!\u2002\u2002\u2002')
+        self.api.post_statuses_update.assert_called_with(status='BOING!\u2002\u2002\u2002')
 
         self.deoldehove.sound_clock(t4)
-        self.api.post_statuses_update.assert_called_with(status=u'BOING!\u2002\u2002\u2002\u2002')
+        self.api.post_statuses_update.assert_called_with(status='BOING!\u2002\u2002\u2002\u2002')
 
     def test_01_00_lwd_culinair(self):
         t = self._time('2013-06-09T14:00:00Z')
         self.deoldehove.sound_clock_lwd_culinair(t)
-        self.api.post_statuses_update.assert_called_once_with(status=u'HAP HAP')
+        self.api.post_statuses_update.assert_called_once_with(status='HAP HAP')
 
     def test_01_00_into_the_grave(self):
         t = self._time('2013-06-09T14:00:00Z')
         self.deoldehove.sound_clock_into_the_grave(t)
-        self.api.post_statuses_update.assert_called_once_with(status=u'METAL! METAL!')
-        
+        self.api.post_statuses_update.assert_called_once_with(status='METAL! METAL!')
+
 class TestDeOldehove_Fail(unittest.TestCase):
     def setUp(self):
         self.api = mock.Mock()
 
-        self.api.config = { 
+        self.api.config = {
             'default': {
                 'separator': ' ',
                 'sound' : 'BOING!'
@@ -91,5 +91,6 @@ class TestDeOldehove_Fail(unittest.TestCase):
 
     def test_fail(self):
         t = self._time('2013-06-09T14:00:00Z')
-        result = self.deoldehove.sound_clock(t)
+        with mock.patch('time.sleep'):
+            result = self.deoldehove.sound_clock(t)
         self.assertFalse(result)
