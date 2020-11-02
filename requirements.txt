@@ -3,5 +3,4 @@ pytz
 python-dateutil
 requests
 unidecode
-pillow
 python-prctl

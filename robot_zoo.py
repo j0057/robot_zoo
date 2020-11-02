@@ -12,7 +12,6 @@ from bot import deoldehove as _deoldehove
 from bot import hetluchtalarm as _hetluchtalarm
 from bot import y2k38warning as _y2k38warning
 from bot import maanfase as _maanfase
-from bot import geotweets as _geotweets
 from bot import johndoeveloper as _johndoeveloper
 
 def parse_args():
@@ -58,10 +57,6 @@ class RobotZooCET(pycron.CronRunner):
 
             #   ........ ........ ........ ........ ........ ........ ........  @maanfase
             , ('00       *        *        *        *        *        *       ', maanfase.post_phase)
-
-            #   ........ ........ ........ ........ ........ ........ ........  geotweets
-            , ('05       00-59/10 *        *        *        *        *       ', geotweets.save_raw)
-            , ('04       00-59/10 *        *        *        *        *       ', geotweets.create_viz)
 
             #   -------- -------- -------- -------- -------- -------- --------
         )
@@ -113,7 +108,6 @@ if __name__ == '__main__':
     hetluchtalarm = _hetluchtalarm.Luchtalarm('hetluchtalarm')
     y2k38warning = _y2k38warning.Y2K38Warning('y2k38warning')
     maanfase = _maanfase.Maanfase('maanfase')
-    geotweets = _geotweets.GeoTweets('johndoeveloper')
     firehose = _johndoeveloper.Firehose('johndoeveloper', '3.23,50.75,7.23,53.75')
 
     executor = pycron.CronExecutor()
@@ -125,7 +119,6 @@ if __name__ == '__main__':
     hetluchtalarm.api.check()
     y2k38warning.api.check()
     maanfase.api.check()
-    geotweets.api.check()
     firehose.api.check()
 
     firehose.add_listener(grotebroer1.inspector)
@@ -134,7 +127,6 @@ if __name__ == '__main__':
     cancel = [ cron_cet.run(),
                cron_utc.run(),
                executor.run(count=4),
-               geotweets.process(),
                firehose.run() ]
     try:
         while True:
