@@ -6,3 +6,5 @@ htmlcov
 
 *.png
 *.log
+
+cfg/*.json
