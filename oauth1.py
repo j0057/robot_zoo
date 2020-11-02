@@ -14,9 +14,9 @@ urlencode = lambda s: urllib.parse.quote(s, safe='')
 urlencode_dict = lambda d: '&'.join('{0}={1}'.format(urlencode(k), urlencode(d[k])) for k in sorted(d.keys()))
 
 def hmac_sha1(key, s):
-    h = hmac.new(key, digestmod=hashlib.sha1)
-    h.update(s)
-    return h.digest().encode('base64').strip()
+    h = hmac.new(key.encode('ascii'), digestmod=hashlib.sha1)
+    h.update(s.encode('ascii'))
+    return base64.b64encode(h.digest()).decode('ascii')
 
 class Oauth1(object):
     def __init__(self, config={}, nonce=nonce, timestamp=timestamp, stream=False):
@@ -80,4 +80,3 @@ class Oauth1(object):
         sig_key = '&'.join([ urlencode(self.consumer_secret), urlencode(self.token_secret) ])
         oauth['oauth_signature'] = self._calc_sig(sig_key, sig_str)
         return 'OAuth ' + ', '.join('{0}="{1}"'.format(k, urlencode(oauth[k])) for k in sorted(oauth.keys()))
-
