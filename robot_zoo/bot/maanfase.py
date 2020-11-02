@@ -5,7 +5,7 @@ import logging
 import ephem
 import pytz
 
-import twitter
+from .. import twitter
 
 TZ_UTC = pytz.utc
 TZ_CET = pytz.timezone('Europe/Amsterdam')

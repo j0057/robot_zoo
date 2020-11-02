@@ -4,8 +4,8 @@ import time
 import threading
 import logging
 
-import twitter
-import pycron
+from . import twitter
+from . import pycron
 
 from bot import casio_f91w as _casio_f91w
 from bot import deoldehove as _deoldehove

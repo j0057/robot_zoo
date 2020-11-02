@@ -1,6 +1,6 @@
 import logging
 
-import twitter
+from .. import twitter
 
 # 2038-01-19 03:14:07 UTC
 

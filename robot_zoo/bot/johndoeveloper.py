@@ -2,7 +2,7 @@
 
 import logging
 
-import twitter
+from .. import twitter
 
 class Firehose(object):
     def __init__(self, name, locations, api=None, stream=None):
@@ -27,9 +27,9 @@ class Firehose(object):
                 self.log.info('Opening stream...')
                 firehose = self.stream.get_statuses_filter(locations=self.locations, stall_warnings=True)
                 for tweet in firehose:
-                    if cancel: 
+                    if cancel:
                         break
-                    if not tweet: 
+                    if not tweet:
                         continue
                     if 'warning' in tweet:
                         warning = tweet['warning']
@@ -42,4 +42,3 @@ class Firehose(object):
             self.log.exception('WTF: %r', e)
         finally:
             self.enqueue(None)
-
