@@ -1,9 +1,0 @@
-{
-    "oauth": {
-        "consumer_secret": "", 
-        "token": "", 
-        "consumer_key": "", 
-        "token_secret": ""
-    }, 
-    "latest_mention": "" 
-}
