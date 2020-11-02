@@ -10,7 +10,6 @@ import pycron
 from bot import casio_f91w as _casio_f91w
 from bot import deoldehove as _deoldehove
 from bot import hetluchtalarm as _hetluchtalarm
-from bot import grotebroer1 as _grotebroer1
 from bot import y2k38warning as _y2k38warning
 from bot import maanfase as _maanfase
 from bot import geotweets as _geotweets
@@ -59,9 +58,6 @@ class RobotZooCET(pycron.CronRunner):
 
             #   ........ ........ ........ ........ ........ ........ ........  @maanfase
             , ('00       *        *        *        *        *        *       ', maanfase.post_phase)
-
-            #   ........ ........ ........ ........ ........ ........ ........  @grotebroer1
-            , ('01-59/15 *        *        *        *        *        *       ', grotebroer1.update_regex)
 
             #   ........ ........ ........ ........ ........ ........ ........  geotweets
             , ('05       00-59/10 *        *        *        *        *       ', geotweets.save_raw)
@@ -115,7 +111,6 @@ if __name__ == '__main__':
     casio_f91w = _casio_f91w.CasioF91W('casio_f91w')
     deoldehove = _deoldehove.DeOldehove('deoldehove')
     hetluchtalarm = _hetluchtalarm.Luchtalarm('hetluchtalarm')
-    grotebroer1 = _grotebroer1.GroteBroer1('grotebroer1')
     y2k38warning = _y2k38warning.Y2K38Warning('y2k38warning')
     maanfase = _maanfase.Maanfase('maanfase')
     geotweets = _geotweets.GeoTweets('johndoeveloper')
@@ -128,7 +123,6 @@ if __name__ == '__main__':
     casio_f91w.api.check()
     deoldehove.api.check()
     hetluchtalarm.api.check()
-    grotebroer1.api.check()
     y2k38warning.api.check()
     maanfase.api.check()
     geotweets.api.check()
@@ -140,8 +134,6 @@ if __name__ == '__main__':
     cancel = [ cron_cet.run(),
                cron_utc.run(),
                executor.run(count=4),
-               grotebroer1.userstream.run(),
-               grotebroer1.inspector.run(),
                geotweets.process(),
                firehose.run() ]
     try:
