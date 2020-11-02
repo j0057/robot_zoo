@@ -45,18 +45,18 @@ class CronRunner(object):
         DAYS     = 'mon tue wed thu fri sat sun'.split()
 
         rule = rule.lower().split()
-        name = action.__self__.name if hasattr(action, 'im_self') else ''
+        name = action.__self__.name if hasattr(action, '__self__') else ''
         self.log.info('%s %-16s %-32s', ' '.join('{0:9}'.format(r) for r in rule), name, action.__name__)
 
         # replace * with 00-00/01 on the left side of the first non-*
-        for (i, v) in enumerate(rule):          
+        for (i, v) in enumerate(rule):
             if v == '*':
                 rule[i] = FIRSTS[i]
             else:
                 break
 
         # replace * with 00-max/01 on the right side of the first non-*
-        for (j, v) in enumerate(rule):          
+        for (j, v) in enumerate(rule):
             if j <= i:
                 continue
             if v == '*':
@@ -82,7 +82,7 @@ class CronRunner(object):
         if yt < 101: yt += 2000
         rule[-2] = (yf, yt, ys)
 
-        return (list(rule), action)                 
+        return (list(rule), action)
 
     def get_runnable_actions(self, t):
         check = lambda x, f, t, s: (f <= x < t) and (((x - f) % s) == 0)
@@ -91,7 +91,7 @@ class CronRunner(object):
         for rule, action in self.rules:
             values = list(zip([t.tm_sec, t.tm_min, t.tm_hour, t.tm_mday, t.tm_mon, t.tm_year, t.tm_wday], rule))
             if all(check(x, *r) for (x, r) in values):
-                curr_owner = action.__self__ if hasattr(action, 'im_self') else None
+                curr_owner = action.__self__ if hasattr(action, '__self__') else None
                 if curr_owner != prev_owner:
                     prev_owner = curr_owner
                     yield action
@@ -114,4 +114,3 @@ class CronRunner(object):
                 while self.queue.qsize() < target_len:
                     self.queue.put(None)
                     time.sleep(0.2)
-
