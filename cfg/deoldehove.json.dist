@@ -1,21 +1,21 @@
 {
     "oauth": {
-		"consumer_key": "", 
-		"consumer_secret": "", 
-		"token": "", 
-		"token_secret": ""
-	},
-	"default": {
-		"sound": "BOING",
-		"separator": ", "
-	},
-	"ljouwert culinair 2010": {
-		"sound": "NOM!",
-		"separator": " "
-	},
+        "consumer_key": "",
+        "consumer_secret": "",
+        "token": "",
+        "token_secret": ""
+    },
+    "default": {
+        "sound": "BOING",
+        "separator": ", "
+    },
+    "ljouwert culinair 2010": {
+        "sound": "NOM!",
+        "separator": " "
+    },
     "metal": {
         "sound": "METAL!",
         "separator": " "
     },
-	"latest_mention": ""
+    "latest_mention": ""
 }
