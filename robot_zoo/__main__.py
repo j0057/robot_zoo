@@ -30,8 +30,8 @@ class RobotZooCET(pycron.CronRunner):
 
             #   ........ ........ ........ ........ ........ ........ ......... @casio_f91w
               ('*        00       *        *        *        *        *       ', casio_f91w.send_beep)
-            , ('01       00-59/02 *        *        *        *        *       ', casio_f91w.handle_mentions)
-            , ('02       *        *        *        *        *        *       ', casio_f91w.send_alarms)
+            # ('01       00-59/02 *        *        *        *        *       ', casio_f91w.handle_mentions)
+            # ('02       *        *        *        *        *        *       ', casio_f91w.send_alarms)
 
             #   ........ ........ ........ ........ ........ ........ ........  @deoldehove
             , ('*        00-59/30 *        10-12    sep      2010     *       ', deoldehove.sound_clock_lwd_culinair)
