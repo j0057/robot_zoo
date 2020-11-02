@@ -8,7 +8,7 @@ import twitter
 class TestRetry(unittest.TestCase):
     @twitter.retry
     def spam(self):
-        return 42 
+        return 42
 
     @twitter.retry
     def albatross(self):
@@ -16,14 +16,14 @@ class TestRetry(unittest.TestCase):
 
     @twitter.retry
     def spanish_inquisition(self):
+        self.i += 1
         if self.i < 4:
-            raise twitter.FailWhale()
-        else:
-            self.i += 1
+            raise twitter.FailWhale("Shit's fucked!")
+        return self.i
 
     def setUp(self):
         self.i = 0
-        self.api = mock.Mock()
+        self.log = mock.Mock()
 
     def test_retry(self):
         r = self.spam()
@@ -33,10 +33,13 @@ class TestRetry(unittest.TestCase):
         with mock.patch('time.sleep'):
             r = self.albatross()
         self.assertFalse(r)
+        self.assertTrue(self.log.info.called)
 
     def test_ultimately_ok(self):
         with mock.patch('time.sleep'):
-            self.spanish_inquisition()
+            r = self.spanish_inquisition()
+        self.assertEqual(r, 4)
+        self.assertTrue(self.log.error.called)
 
 class TestTwitterAPI(unittest.TestCase):
     def setUp(self):

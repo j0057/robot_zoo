@@ -32,7 +32,7 @@ def retry(f):
                     self.log.info('Attempt %d, t=%d', i, t)
                 return f(self, *a, **k)
             except FailWhale as e:
-                self.log.info("Retry caught %s - %r", type(e).__name__, e)
+                self.log.error("Retry caught %s - %r", type(e).__name__, e)
                 time.sleep(t)
                 t *= 2
                 i += 1
