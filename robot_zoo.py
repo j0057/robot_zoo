@@ -102,6 +102,7 @@ if __name__ == '__main__':
 
     logging.info('Robot zoo starting')
 
+    johndoeveloper = twitter.TwitterAPI('johndoeveloper')
     casio_f91w = _casio_f91w.CasioF91W('casio_f91w')
     deoldehove = _deoldehove.DeOldehove('deoldehove')
     hetluchtalarm = _hetluchtalarm.Luchtalarm('hetluchtalarm')
@@ -111,6 +112,8 @@ if __name__ == '__main__':
     executor = pycron.CronExecutor()
     cron_cet = RobotZooCET('cron_cet', executor.queue)
     cron_utc = RobotZooUTC('cron_utc', executor.queue)
+
+    johndoeveloper.check()
 
     casio_f91w.api.check()
     deoldehove.api.check()
