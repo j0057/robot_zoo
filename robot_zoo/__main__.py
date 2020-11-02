@@ -7,11 +7,11 @@ import logging
 from . import twitter
 from . import pycron
 
-from bot import casio_f91w as _casio_f91w
-from bot import deoldehove as _deoldehove
-from bot import hetluchtalarm as _hetluchtalarm
-from bot import y2k38warning as _y2k38warning
-from bot import maanfase as _maanfase
+from .bot import casio_f91w as _casio_f91w
+from .bot import deoldehove as _deoldehove
+from .bot import hetluchtalarm as _hetluchtalarm
+from .bot import y2k38warning as _y2k38warning
+from .bot import maanfase as _maanfase
 
 def parse_args():
     import argparse

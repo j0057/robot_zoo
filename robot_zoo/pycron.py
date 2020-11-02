@@ -5,7 +5,7 @@ import time
 import threading, queue
 import traceback
 
-import twitter
+from . import twitter
 
 class CronExecutor(object):
     def __init__(self):

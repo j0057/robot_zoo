@@ -15,7 +15,7 @@ import platform
 import prctl
 import requests
 
-import oauth1
+from . import oauth1
 
 class FailWhale(Exception):
     def log_error(self, obj):
