@@ -121,7 +121,6 @@ if __name__ == '__main__':
     maanfase.api.check()
     firehose.api.check()
 
-    firehose.add_listener(grotebroer1.inspector)
     firehose.add_listener(geotweets)
 
     cancel = [ cron_cet.run(),
