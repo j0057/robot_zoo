@@ -1,12 +1,14 @@
 import logging
 
 from .. import twitter
+from .. import holidays
 
 class Luchtalarm(object):
     def __init__(self, name, api=None):
         self.name = name
         self.log = logging.getLogger(__name__)
         self.api = api if api else twitter.TwitterAPI(name, self.log)
+        self.holidays = holidays.NL(None)
 
     def stuffing(self, month, year):
         year -= 2012
@@ -18,23 +20,13 @@ class Luchtalarm(object):
               + 'Hooooooooooooeeeeeeeeeeeeeeuuuuuuuuuuiiiiiiiiiii!'
               + self.stuffing(month, year))
 
-    @twitter.retry
-    def tweede_paasdag_2013(self, t):
-        status = "Vandaag als het goed is geen luchtalarm, vrolijk Pasen!"
-        self.log.info('Posting status: %r (%d)', status, len(status))
-        self.api.post_statuses_update(status=status)
-        return True
-
-    @twitter.retry
-    def bevrijdingsdag_2014(self, t):
-        status = "\u00ad"
-        self.log.info('Posting status: %r (%d)', status, len(status))
-        self.api.post_statuses_update(status=status)
-        return True
+    def feestdag(self, holiday):
+        return f"{holiday} \u2014 vandaag geen luchtalarm"
 
     @twitter.retry
     def sound_alarm(self, t):
-        status = self.luchtalarm(t.tm_mon, t.tm_year)
-        self.log.info('Posting status: %s (%d)', status, len(status))
+        self.holidays.year = t.tm_year
+        status = self.feestdag(holiday) if (holiday := self.feestdag(t.tm_mon, t.tm_mday)) else self.luchtalarm(t.tm_mon, t.tm_year)
+        self.log.info('Posting status: %r (%d)', status, len(status))
         self.api.post_statuses_update(status=status)
         return True
