@@ -10,7 +10,7 @@ class Luchtalarm(object):
 
     def stuffing(self, month, year):
         year -= 2012
-        return (bin(month)[2:].rjust(4, '0') + bin(year)[2:].rjust(4, '0')).replace('0', '\u0020').replace('1', '\u2002') + '\u2002'
+        return (bin(month)[2:].rjust(4, '0') + bin(year)[2:].rjust(4, '0')).replace('0', '\u0020').replace('1', '\u00ad') + '\u00ad'
 
     def luchtalarm(self, month, year):
         return ('Hooooooooooooeeeeeeeeeeeeeeuuuuuuuuuuiiiiiiiiiii!'
@@ -27,7 +27,7 @@ class Luchtalarm(object):
 
     @twitter.retry
     def bevrijdingsdag_2014(self, t):
-        status = "\u2002"
+        status = "\u00ad"
         self.log.info('Posting status: %r (%d)', status, len(status))
         self.api.post_statuses_update(status=status)
         return True
