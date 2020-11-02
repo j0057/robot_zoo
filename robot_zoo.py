@@ -9,7 +9,6 @@ import pycron
 
 from bot import casio_f91w as _casio_f91w
 from bot import deoldehove as _deoldehove
-from bot import msvlieland as _msvlieland
 from bot import hetluchtalarm as _hetluchtalarm
 from bot import convertbot as _convertbot
 from bot import grotebroer1 as _grotebroer1
@@ -53,11 +52,6 @@ class RobotZooCET(pycron.CronRunner):
             , ('*        00-59/30 00-08    11       aug      2013     *       ', deoldehove.sound_clock_into_the_grave)
 
             , ('*        00-59/30 *        *        *        *        *       ', deoldehove.sound_clock)
-
-            #   ........ ........ ........ ........ ........ ........ ........  @msvlieland
-            , ('00       00       00       *        *        *        *       ', msvlieland.update_departures)
-            , ('00       59       08       *        *        *        *       ', msvlieland.update_departures_for_today)
-            , ('00       *        *        *        *        *        *       ', msvlieland.sound_horn_dynamic)
 
             #   ........ ........ ........ ........ ........ ........ ........  @convertbot
             , ('00       *        *        *        *        *        *       ', convertbot.post_time)
@@ -124,7 +118,6 @@ if __name__ == '__main__':
 
     casio_f91w = _casio_f91w.CasioF91W('casio_f91w')
     deoldehove = _deoldehove.DeOldehove('deoldehove')
-    msvlieland = _msvlieland.MsVlieland('msvlieland')
     hetluchtalarm = _hetluchtalarm.Luchtalarm('hetluchtalarm')
     convertbot = _convertbot.ConvertBot('convertbot')
     grotebroer1 = _grotebroer1.GroteBroer1('grotebroer1')
@@ -139,7 +132,6 @@ if __name__ == '__main__':
 
     casio_f91w.api.check()
     deoldehove.api.check()
-    msvlieland.api.check()
     hetluchtalarm.api.check()
     convertbot.api.check()
     grotebroer1.api.check()
