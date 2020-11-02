@@ -12,7 +12,6 @@ from bot import deoldehove as _deoldehove
 from bot import hetluchtalarm as _hetluchtalarm
 from bot import y2k38warning as _y2k38warning
 from bot import maanfase as _maanfase
-from bot import johndoeveloper as _johndoeveloper
 
 def parse_args():
     import argparse
@@ -108,7 +107,6 @@ if __name__ == '__main__':
     hetluchtalarm = _hetluchtalarm.Luchtalarm('hetluchtalarm')
     y2k38warning = _y2k38warning.Y2K38Warning('y2k38warning')
     maanfase = _maanfase.Maanfase('maanfase')
-    firehose = _johndoeveloper.Firehose('johndoeveloper', '3.23,50.75,7.23,53.75')
 
     executor = pycron.CronExecutor()
     cron_cet = RobotZooCET('cron_cet', executor.queue)
@@ -119,12 +117,11 @@ if __name__ == '__main__':
     hetluchtalarm.api.check()
     y2k38warning.api.check()
     maanfase.api.check()
-    firehose.api.check()
 
     cancel = [ cron_cet.run(),
                cron_utc.run(),
                executor.run(count=4),
-               firehose.run() ]
+             ]
     try:
         while True:
             time.sleep(1)
