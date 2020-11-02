@@ -4,10 +4,11 @@ import time
 import hashlib
 import hmac
 import urllib.request, urllib.parse, urllib.error
+import base64
 
 import requests
 
-nonce = lambda n=36: os.urandom(n).encode('base64').strip().replace('/','-').replace('+','_')
+nonce = lambda n=36: base64.urlsafe_b64encode(os.urandom(n)).decode('ascii')
 timestamp = lambda: str(int(time.time()))
 urlencode = lambda s: urllib.parse.quote(s, safe='')
 urlencode_dict = lambda d: '&'.join('{0}={1}'.format(urlencode(k), urlencode(d[k])) for k in sorted(d.keys()))
