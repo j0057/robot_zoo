@@ -1,10 +1,6 @@
+*.egg-info
 *.pyc
+build
+dist
 env
-.coverage
-htmlcov
-*.swp
-
-*.png
-*.log
-
 cfg/*.json
