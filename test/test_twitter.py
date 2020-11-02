@@ -58,4 +58,4 @@ class TestTwitterAPI(unittest.TestCase):
                 'POST',
                 'https://api.twitter.com/1.1/statuses/update.json',
                 headers={'Accept': 'application/json'},
-                post={'status': 'test'})
+                post={'status': b'test'})
