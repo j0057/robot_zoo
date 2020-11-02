@@ -10,7 +10,6 @@ import pycron
 from bot import casio_f91w as _casio_f91w
 from bot import deoldehove as _deoldehove
 from bot import hetluchtalarm as _hetluchtalarm
-from bot import convertbot as _convertbot
 from bot import grotebroer1 as _grotebroer1
 from bot import y2k38warning as _y2k38warning
 from bot import maanfase as _maanfase
@@ -52,9 +51,6 @@ class RobotZooCET(pycron.CronRunner):
             , ('*        00-59/30 00-08    11       aug      2013     *       ', deoldehove.sound_clock_into_the_grave)
 
             , ('*        00-59/30 *        *        *        *        *       ', deoldehove.sound_clock)
-
-            #   ........ ........ ........ ........ ........ ........ ........  @convertbot
-            , ('00       *        *        *        *        *        *       ', convertbot.post_time)
 
             #   ........ ........ ........ ........ ........ ........ ........  @hetluchtalarm
             , ('*        00       12       01       04       2013     *       ', hetluchtalarm.tweede_paasdag_2013)
@@ -119,7 +115,6 @@ if __name__ == '__main__':
     casio_f91w = _casio_f91w.CasioF91W('casio_f91w')
     deoldehove = _deoldehove.DeOldehove('deoldehove')
     hetluchtalarm = _hetluchtalarm.Luchtalarm('hetluchtalarm')
-    convertbot = _convertbot.ConvertBot('convertbot')
     grotebroer1 = _grotebroer1.GroteBroer1('grotebroer1')
     y2k38warning = _y2k38warning.Y2K38Warning('y2k38warning')
     maanfase = _maanfase.Maanfase('maanfase')
@@ -133,7 +128,6 @@ if __name__ == '__main__':
     casio_f91w.api.check()
     deoldehove.api.check()
     hetluchtalarm.api.check()
-    convertbot.api.check()
     grotebroer1.api.check()
     y2k38warning.api.check()
     maanfase.api.check()
