@@ -1,5 +1,5 @@
 pytest
 pytest-mock
-pytest-coverage
+pytest-cov
 pytest-watch
 mock

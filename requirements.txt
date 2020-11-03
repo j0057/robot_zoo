@@ -1,4 +1,4 @@
-pyephem
+ephem
 pytz
 python-dateutil
 requests
