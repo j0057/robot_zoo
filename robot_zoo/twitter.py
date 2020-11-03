@@ -11,6 +11,7 @@ import urllib.request, urllib.error, urllib.parse, base64, json, threading, queu
 import functools
 import logging
 import platform
+import os
 
 import prctl
 import requests
@@ -38,7 +39,7 @@ def retry(f):
                 i += 1
     return retry
 
-class Cancellation(object):
+class Cancellation:
     canceled = False
     def __bool__(self):
         return self.canceled
@@ -76,11 +77,17 @@ def gettid():
         return -1
     return ctypes.CDLL('libc.so.6').syscall(gettid[machine])
 
-class Configuration(object):
-    def __init__(self, config_file=None):
-        self.config = None
+class Configuration:
+    def __init__(self, config_file, log):
         self.config_file = config_file
+        self.log = log
         self.load()
+
+    def __getitem__(self, name):
+        return self.config[name]
+
+    def __setitem__(self, name, value):
+        self.config[name] = value
 
     def load(self):
         if self.config_file:
@@ -94,7 +101,7 @@ class Configuration(object):
             with open(self.config_file, 'wb') as f:
                 json.dump(self.config, f, indent=4)
 
-class TwitterAPI(Configuration):
+class TwitterAPI:
     API_VERSION = '1.1'
     API_HOST = 'api.twitter.com'
     API_STREAM = False
@@ -105,8 +112,7 @@ class TwitterAPI(Configuration):
     def __init__(self, name, log=None):
         self.name = '@{0}'.format(name)
         self.log = log if log else logging.getLogger(__name__)
-        config_file = 'cfg/{0}.json'.format(name)
-        super(TwitterAPI, self).__init__(config_file)
+        self.config = Configuration(f"{os.environ.get('ROBOT_ZOO_CONFIG_DIR', 'cfg')}/{name}.json", self.log)
 
     def __getattr__(self, name):
         match = self.API_REGEX.match(name)
