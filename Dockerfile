@@ -11,7 +11,8 @@ ENV PIP_PROGRESS_BAR=off \
     PIP_NO_INDEX=yes \
     PIP_FIND_LINKS=/var/lib/python
 
-RUN python3 -m pip install --user robot_zoo
+ARG ROBOT_ZOO_VERSION
+RUN python3 -m pip install --user "robot_zoo==$ROBOT_ZOO_VERSION"
 
 FROM j0057.azurecr.io/alpine:3.12
 RUN apk add python3
