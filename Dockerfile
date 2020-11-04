@@ -18,9 +18,7 @@ FROM j0057.azurecr.io/alpine:3.12
 RUN apk add python3
 ENV PYTHONUSERBASE=/app
 
-COPY --from=build /app /app
-
 RUN apk add libcap
-
 WORKDIR /app
 CMD python3 -m robot_zoo
+COPY --from=build /app /app
