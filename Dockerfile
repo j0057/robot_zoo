@@ -21,4 +21,5 @@ ENV PYTHONUSERBASE=/app
 RUN apk add libcap
 WORKDIR /app
 CMD python3 -m robot_zoo
+USER 999:999
 COPY --from=build /app /app
