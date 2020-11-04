@@ -2,6 +2,9 @@
 
 ## Building container image
 
+I use a local PyPI cache. Just a plain directory, nothing fancy. See my
+dotfiles repo.
+
 The following Python packages should be installed/available:
 
 - `pip`
@@ -27,7 +30,7 @@ we'll have to build our own...
 Build the container image with the local cache mounted into `/var/lib/python`,
 passing in the wheel version:
 
-    podman build -v ~/.cache/python:/var/lib/python --build-arg ROBOT_ZOO_VERSION=$(./setup.py --version) -t robot_zoo:$(date +%y%m%d%H%M)-$(./setup.py --version)
+    podman build -v ~/.cache/python:/var/lib/python --build-arg ROBOT_ZOO_VERSION=$(./setup.py --version) -t robot_zoo:$(date +%y%m%d%H%M)-$(git describe) -t robot_zoo:dev
 
 ## Running the container
 
