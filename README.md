@@ -1,44 +1,37 @@
+# Twitter Robot Zoo
 
-TwitterAPI
-==========
+## Building container image
 
-TwitterAPI allows me to connect to twitter with a minimum of code. It also has a cron-style
-task scheduler.
+The following Python packages should be installed/available:
 
-CronRunner
-----------
+- `pip`
+- `setuptools`
+- `wheel`
+- `setuptools-version-command`
 
-CronRunner in the module pycron.py is a basic crontab-style task scheduler. It has a little
-more resolution than your average cron; you can plan down to the second and up to the year.
-Basically it looks like this:
+Download dependencies into your local cache:
 
-    def some_periodic_function(t):
-        # t is the time.struct_time with the current date/time info
-        pass
+    pip download -d ~/.cache/python -r requirements.txt
 
-    cron = CronRunner(
-        ('*        00-59/30 *        *        *        *        *        ', some_periodic_function))
-    cron.run_local()
+Build the `robot_zoo` wheel into your local cache:
 
+    ./setup.py bdist_wheel -d ~/.cache/python
 
-TwitterAPI
-----------
+The dependency `ephem` is a bit fiddly to run inside an `alpine` container --
+its pip won't install `manylinux1` wheels (because of muslc supposedly), so
+we'll have to build our own...
 
-TwitterAPI makes it really easy to do stuff against Twitter's REST API. Refer to http://dev.twitter.com
-for documentation about the API itself.
+    python3 -m pip download -d ~/.cache/python --no-binary :all: ephem
+    podman run --rm -v ~/.cache/python:/var/lib/python alpine:3.12 sh -c 'apk add python3 python3-dev alpine-sdk && python3 -m ensurepip && python3 -m pip --no-cache-dir --disable-pip-version-check install --upgrade pip setuptools wheel && pip --no-cache-dir --disable-pip-version-check wheel --no-index --find-links /var/lib/python -w /var/lib/python ephem'
 
-Example:  http://dev.twitter.com/docs/api/1/post/statuses/update
+Build the container image with the local cache mounted into `/var/lib/python`,
+passing in the wheel version:
 
-    twtr = twitter.TwitterAPI('johndoeveloper')
-    twtr.post_statuses_update(status='My first tweet from Python!')
+    podman build -v ~/.cache/python:/var/lib/python --build-arg ROBOT_ZOO_VERSION=$(./setup.py --version) -t robot_zoo:$(date +%y%m%d%H%M)-$(./setup.py --version)
 
-Example: http://dev.twitter.com/docs/api/1/post/statuses/retweet/%3Aid
+## Running the container
 
-    tweet_id = <some id>
+Environment variables:
 
-    twtr = twitter.TwitterAPI('johndoeveloper')
-    twtr.post_statuses_retweet(tweet_id)
-   
-So keyword arguments are converted to GET parameters, and positional parameters are converted to elements
-in the URL's path.
- 
+- `$ROBOT_ZOO_CONFIG_DIR` (default `cfg`, relative to work dir `/app`)
+- `$ROBOT_ZOO_STATE_DIR` (default `.`, relative to work dir `/app`)
