@@ -97,7 +97,7 @@ class Configuration:
                 with open(self.config_file, 'rb') as f:
                     self.config = json.load(f)
             except IOError as e:
-                self.log.warn(f"WARNING: caught {e} when loading {self.config_file}, using default")
+                self.log.warn(f"WARNING: caught {type(e)} ({e}) when loading {self.config_file}, using default")
                 self.config = self.default()
 
     def save(self):
