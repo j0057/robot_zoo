@@ -1,4 +1,4 @@
-FROM j0057.azurecr.io/alpine:3.12 AS build
+FROM alpine:3.12 AS build
 RUN apk add python3
 ENV PYTHONUSERBASE=/app
 
@@ -14,7 +14,7 @@ ENV PIP_PROGRESS_BAR=off \
 ARG ROBOT_ZOO_VERSION
 RUN python3 -m pip install --user "robot_zoo==$ROBOT_ZOO_VERSION"
 
-FROM j0057.azurecr.io/alpine:3.12
+FROM alpine:3.12
 RUN apk add python3
 ENV PYTHONUSERBASE=/app
 
