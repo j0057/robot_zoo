@@ -21,5 +21,7 @@ ENV PYTHONUSERBASE=/app
 RUN apk add libcap
 WORKDIR /app
 CMD python3 -m robot_zoo
+RUN apk add tzdata
+ENV TZ=Europe/Amsterdam
 USER 999:999
 COPY --from=build /app /app
