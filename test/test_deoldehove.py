@@ -3,8 +3,8 @@ import unittest
 
 import mock
 
-import twitter
-import bot.deoldehove
+from robot_zoo import twitter
+from robot_zoo.bot import deoldehove
 
 class TestDeOldehove(unittest.TestCase):
     def setUp(self):
@@ -27,7 +27,7 @@ class TestDeOldehove(unittest.TestCase):
         }
         self.api.post_statuses_update.return_value = True
 
-        self.deoldehove = bot.deoldehove.DeOldehove('deoldehove', self.api)
+        self.deoldehove = deoldehove.DeOldehove('deoldehove', self.api)
 
     def _time(self, s):
         return time.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
@@ -51,16 +51,16 @@ class TestDeOldehove(unittest.TestCase):
         t4 = self._time('2013-12-15T04:30:00Z')
 
         self.deoldehove.sound_clock(t1)
-        self.api.post_statuses_update.assert_called_with(status='BOING!\u2002')
+        self.api.post_statuses_update.assert_called_with(status='BOING!\xad')
 
         self.deoldehove.sound_clock(t2)
-        self.api.post_statuses_update.assert_called_with(status='BOING!\u2002\u2002')
+        self.api.post_statuses_update.assert_called_with(status='BOING!\xad\xad')
 
         self.deoldehove.sound_clock(t3)
-        self.api.post_statuses_update.assert_called_with(status='BOING!\u2002\u2002\u2002')
+        self.api.post_statuses_update.assert_called_with(status='BOING!\xad\xad\xad')
 
         self.deoldehove.sound_clock(t4)
-        self.api.post_statuses_update.assert_called_with(status='BOING!\u2002\u2002\u2002\u2002')
+        self.api.post_statuses_update.assert_called_with(status='BOING!\xad\xad\xad\xad')
 
     def test_01_00_lwd_culinair(self):
         t = self._time('2013-06-09T14:00:00Z')
@@ -84,7 +84,7 @@ class TestDeOldehove_Fail(unittest.TestCase):
         }
         self.api.post_statuses_update.side_effect = twitter.FailWhale
 
-        self.deoldehove = bot.deoldehove.DeOldehove('deoldehove', self.api)
+        self.deoldehove = deoldehove.DeOldehove('deoldehove', self.api)
 
     def _time(self, s):
         return time.strptime(s, '%Y-%m-%dT%H:%M:%SZ')

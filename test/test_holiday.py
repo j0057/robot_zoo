@@ -1,6 +1,6 @@
 import unittest
 
-from .. import holidays
+from robot_zoo import holidays
 
 class TestHoliday2013(unittest.TestCase):
     def setUp(self):
@@ -32,8 +32,8 @@ class TestHoliday2014(unittest.TestCase):
         assert self.nl( 4, 21) == "Tweede Paasdag"
         assert self.nl( 4, 29) == None
         assert self.nl( 4, 30) == None
-        assert self.nl( 4, 26) == None
-        assert self.nl( 4, 27) == "Koningsdag"
+        assert self.nl( 4, 26) == "Koningsdag"
+        assert self.nl( 4, 27) == None
         assert self.nl( 5,  4) == "Dodenherdenking"
         assert self.nl( 5,  5) == "Bevrijdingsdag"
         assert self.nl( 5, 29) == "Hemelvaartsdag"

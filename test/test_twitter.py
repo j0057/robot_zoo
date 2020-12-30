@@ -3,7 +3,8 @@ import unittest
 
 import mock
 
-import twitter
+from robot_zoo import twitter
+from robot_zoo import oauth1
 
 class TestRetry(unittest.TestCase):
     @twitter.retry
@@ -50,11 +51,11 @@ class TestTwitterAPI(unittest.TestCase):
             self.api.delete_spanish_inquisition()
 
     def test_post_tweet(self):
-        with mock.patch('oauth1.Oauth1') as oauth1:
+        with mock.patch('robot_zoo.oauth1.Oauth1') as Oauth1:
             self.api.post_statuses_update(status='test')
 
-            oauth1.assert_called_with(config=mock.ANY, stream=False)
-            oauth1.return_value.request.assert_called_with(
+            Oauth1.assert_called_with(config=mock.ANY, stream=False)
+            Oauth1.return_value.request.assert_called_with(
                 'POST',
                 'https://api.twitter.com/1.1/statuses/update.json',
                 headers={'Accept': 'application/json'},

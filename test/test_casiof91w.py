@@ -3,8 +3,8 @@ import unittest
 
 import mock
 
-import twitter
-import bot.casio_f91w
+from robot_zoo import twitter
+from robot_zoo.bot import casio_f91w
 
 class TestCasioF91W_OK(unittest.TestCase):
     mentions = [
@@ -43,6 +43,7 @@ class TestCasioF91W_OK(unittest.TestCase):
 
     def setUp(self):
         self.api = mock.Mock()
+        self.state = mock.Mock()
 
         def get_mentions(count=200, since_id=None):
             if not since_id:
@@ -56,13 +57,18 @@ class TestCasioF91W_OK(unittest.TestCase):
             'alarms': {}
         }
 
+        state = {'alarms': {}, 'last_mention': {}}
+
         self.api.log.return_value = None
         self.api.post_statuses_update.return_value = True
         self.api.get_statuses_mentions_timeline = get_mentions
         self.api.config.__getitem__ = lambda s, i: config.__getitem__(i)
         self.api.config.__setitem__ = lambda s, i, v: config.__setitem__(i, v)
 
-        self.casiof91w = bot.casio_f91w.CasioF91W('casiof91w', self.api)
+        self.state.__getitem__ = lambda s, i: state.__getitem__(i)
+        self.state.__setitem__ = lambda s, i, v: state.__setitem__(i, v)
+
+        self.casiof91w = casio_f91w.CasioF91W('casiof91w', self.api, self.state)
 
     def _time(self, s):
         return time.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
@@ -219,7 +225,7 @@ class TestCasioF91W_Fail(unittest.TestCase):
         self.api.post_statuses_update.side_effect = twitter.FailWhale
         self.api.get_statuses_mentions_timeline.side_effect = twitter.FailWhale
         self.api.config.__getitem__ = lambda s, i: config.__getitem__(i)
-        self.casiof91w = bot.casio_f91w.CasioF91W('casiof91w', self.api)
+        self.casiof91w = casio_f91w.CasioF91W('casiof91w', self.api)
 
     def _time(self, s):
         return time.strptime(s, '%Y-%m-%dT%H:%M:%SZ')

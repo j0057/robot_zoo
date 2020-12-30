@@ -2,7 +2,7 @@ import unittest
 
 import mock
 
-import oauth1
+from robot_zoo import oauth1
 
 class TestOauth1(unittest.TestCase):
     """
@@ -108,11 +108,11 @@ class TestOauth1(unittest.TestCase):
         self.oauth1.session.prepare_request.return_value = request
         response = self.oauth1.request(self.method, self.url, self.get, self.post, self.headers)
         self.assertTrue(self.oauth1.session.send.called)
-       
+
     def test_timestamp(self):
         result = oauth1.timestamp()
         self.assertNotEqual(result, '')
 
     def test_nonce(self):
         result = oauth1.nonce()
-        self.assertNotEqual(result, '') 
+        self.assertNotEqual(result, '')

@@ -3,12 +3,12 @@ import unittest
 
 import mock
 
-import twitter
-import bot.maanfase
+from robot_zoo import twitter
+from robot_zoo.bot import maanfase
 
 class TestMaanfaseModel(unittest.TestCase):
     def setUp(self):
-        self.model = bot.maanfase.MoonModel()
+        self.model = maanfase.MoonModel()
 
     def test_last_full_moon_of_2013(self):
         self.model.year = 2013
@@ -30,7 +30,7 @@ class TestMaanfaseModel(unittest.TestCase):
 class TestMaanfase(unittest.TestCase):
     def setUp(self):
         self.api = mock.Mock()
-        self.maanfase = bot.maanfase.Maanfase('maanfase', self.api)
+        self.maanfase = maanfase.Maanfase('maanfase', self.api)
 
     def _time(self, s):
         return time.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
