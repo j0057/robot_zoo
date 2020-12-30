@@ -1,3 +1,7 @@
+pip
+setuptools
+wheel
+setuptools-version-command
 pytest
 pytest-mock
 pytest-cov

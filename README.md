@@ -1,5 +1,19 @@
 # Twitter Robot Zoo
 
+## Developing/testing
+
+Make sure the environment variables from [`.envrc`][0] are loaded, either
+manually (`. .envrc`) or by whitelisting them with [direnv][1], then setup
+a virtual env and install the dependencies
+
+    python -m ensurepip
+    python -m pip install -I -U pip setuptools wheel
+    python -m pip install -I -r requirements-dev.txt
+    python -m pip install -I -e .
+
+[0]: ./.envrc
+[1]: https://direnv.net/
+
 ## Building container image
 
 I use a local PyPI cache. Just a plain directory, nothing fancy. See my
