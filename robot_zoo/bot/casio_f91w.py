@@ -21,13 +21,13 @@ class CasioF91W:
     R3 = re.compile(r'alarm (0?[1-9]|1[0-2]):([0-5][0-9]) (AM|PM)')
     R4 = re.compile(r'alarm ([01]?[0-9]|2[0-3]):([0-5][0-9])')
 
-    def __init__(self, name, api=None):
+    def __init__(self, name, api=None, config=None):
         self.name = name
         self.log = logging.getLogger(__name__)
         self.api = api if api else twitter.TwitterAPI(name, self.log)
-        self.state = twitter.Configuration(config_file=f"{os.environ.get('ROBOT_ZOO_STATE_DIR', '.')}/{self.name}.state.json",
-                                           log=self.log,
-                                           default=lambda: {'alarms': {}, 'last_mention': None})
+        self.state = config if config else twitter.Configuration(config_file=f"{os.environ.get('ROBOT_ZOO_STATE_DIR', '.')}/{self.name}.state.json",
+                                                                 log=self.log,
+                                                                 default=lambda: {'alarms': {}, 'last_mention': None})
 
     @twitter.retry
     def send_beep(self, t):
