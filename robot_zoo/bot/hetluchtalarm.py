@@ -26,7 +26,7 @@ class Luchtalarm(object):
     @twitter.retry
     def sound_alarm(self, t):
         self.holidays.year = t.tm_year
-        status = self.feestdag(holiday) if (holiday := self.feestdag(t.tm_mon, t.tm_mday)) else self.luchtalarm(t.tm_mon, t.tm_year)
+        status = self.feestdag(holiday) if (holiday := self.holidays(t.tm_mon, t.tm_mday)) else self.luchtalarm(t.tm_mon, t.tm_year)
         self.log.info('Posting status: %r (%d)', status, len(status))
         self.api.post_statuses_update(status=status)
         return True
