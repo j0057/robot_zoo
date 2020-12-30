@@ -46,6 +46,23 @@ passing in the wheel version:
 
     podman build -v ~/.cache/python:/var/lib/python --build-arg ROBOT_ZOO_VERSION=$(./setup.py --version) -t robot_zoo:$(date +%y%m%d%H%M)-$(git describe) -t robot_zoo:dev
 
+## Deploying container
+
+Skip most of the manual steps above. Use your [podman][2] repo for this. It
+does everything except the pyephem stuff.
+
+On the workstation, as a mortal user:
+
+    ./robot-zoo build
+
+On the production server, as root:
+
+    ./robot-zoo stop
+    ./robot-zoo recreate
+    ./robot-zoo start
+
+[2]: https://github.com/j0057/podman/robot-zoo
+
 ## Running the container
 
 Environment variables:
